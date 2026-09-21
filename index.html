@@ -37,6 +37,12 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
+    .step {
+      font-weight: 600;
+      font-size: 17px;
+      margin-bottom: 12px;
+    }
+
     .label {
       font-size: 14px;
       color: #666;
@@ -47,6 +53,26 @@
       font-size: 20px;
       font-weight: 600;
       min-height: 28px;
+      word-break: break-all;
+    }
+
+    .scan-result {
+      margin-top: 12px;
+      padding: 14px;
+      background: #f7f7f7;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .scan-result-title {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .scan-result-value {
+      font-size: 26px;
+      font-weight: 700;
       word-break: break-all;
     }
 
@@ -82,6 +108,11 @@
       cursor: pointer;
     }
 
+    button:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
     .primary {
       background: #222;
       color: #fff;
@@ -92,6 +123,11 @@
       color: #222;
     }
 
+    .confirm {
+      background: #222;
+      color: #fff;
+    }
+
     .success {
       background: #e8f7e8;
       color: #176b17;
@@ -99,6 +135,7 @@
       border-radius: 8px;
       margin-top: 12px;
       display: none;
+      word-break: break-all;
     }
 
     .error {
@@ -108,15 +145,11 @@
       border-radius: 8px;
       margin-top: 12px;
       display: none;
-    }
-
-    .step {
-      font-weight: 600;
-      margin-bottom: 10px;
+      word-break: break-all;
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
   </style>
 </head>
@@ -128,9 +161,9 @@
   <h1>闲鱼库存扫码</h1>
 
 
-  <!-- =========================
+  <!-- =====================================
        当前操作
-       ========================= -->
+       ===================================== -->
 
   <div class="card">
 
@@ -161,14 +194,16 @@
   </div>
 
 
-  <!-- =========================
-       扫码区域
-       ========================= -->
+  <!-- =====================================
+       扫描区域
+       ===================================== -->
 
   <div class="card">
 
-    <div class="step">
-      扫码
+    <div
+      id="stepTitle"
+      class="step">
+      第一步：扫描商品条码
     </div>
 
     <div
@@ -181,12 +216,43 @@
       正在准备摄像头……
     </div>
 
+
+    <!-- 扫描结果确认区域 -->
+
+    <div
+      id="scanConfirmArea"
+      class="scan-result hidden">
+
+      <div class="scan-result-title">
+        扫描结果
+      </div>
+
+      <div
+        id="scanResultValue"
+        class="scan-result-value">
+      </div>
+
+      <button
+        id="confirmScanButton"
+        class="confirm"
+        onclick="confirmScan()">
+        确认
+      </button>
+
+      <button
+        class="secondary"
+        onclick="retryScan()">
+        重新扫描
+      </button>
+
+    </div>
+
   </div>
 
 
-  <!-- =========================
-       数量
-       ========================= -->
+  <!-- =====================================
+       数量和操作
+       ===================================== -->
 
   <div class="card">
 
@@ -201,11 +267,13 @@
       step="1"
       placeholder="请输入数量">
 
+
     <button
       class="primary"
       onclick="executeStockIn()">
       执行入库
     </button>
+
 
     <button
       class="secondary"
@@ -213,11 +281,13 @@
       重新开始
     </button>
 
+
     <button
       class="secondary"
       onclick="testConnection()">
       测试连接
     </button>
+
 
     <div
       id="successMessage"
@@ -245,12 +315,31 @@
 
 
   // ============================================
-  // 当前扫描状态
+  // 扫描器
   // ============================================
 
   let scanner = null;
 
-  let currentStep = "serial";
+
+  // ============================================
+  // 当前流程
+  //
+  // serial_scan
+  //    ↓
+  // serial_confirm
+  //    ↓
+  // location_scan
+  //    ↓
+  // location_confirm
+  //    ↓
+  // ready
+  // ============================================
+
+  let currentStep = "serial_scan";
+
+
+  let pendingScanResult = "";
+
 
   let serial = "";
 
@@ -353,61 +442,159 @@
 
   function onScanSuccess(decodedText) {
 
-    // 防止同一个条码连续触发
-    if (!scanner) {
+    // 只在扫描状态下接受扫描结果
+    if (
+      currentStep !== "serial_scan" &&
+      currentStep !== "location_scan"
+    ) {
+
       return;
+
     }
 
 
-    // --------------------------------------------
-    // 第一次扫描：商品序号
-    // --------------------------------------------
+    pendingScanResult =
+      String(decodedText).trim();
 
-    if (currentStep === "serial") {
+
+    // 显示扫描结果
+    document.getElementById(
+      "scanResultValue"
+    ).innerText =
+      pendingScanResult;
+
+
+    // 显示确认区域
+    document.getElementById(
+      "scanConfirmArea"
+    ).classList.remove("hidden");
+
+
+    // 根据当前步骤决定确认按钮文字
+    if (
+      currentStep === "serial_scan"
+    ) {
+
+      document.getElementById(
+        "confirmScanButton"
+      ).innerText =
+        "确认商品序号";
+
+    } else {
+
+      document.getElementById(
+        "confirmScanButton"
+      ).innerText =
+        "确认仓存位置";
+
+    }
+
+
+    // 记录当前正在确认
+    if (
+      currentStep === "serial_scan"
+    ) {
+
+      currentStep =
+        "serial_confirm";
+
+    } else {
+
+      currentStep =
+        "location_confirm";
+
+    }
+
+
+    // 暂停扫描
+    pauseScanner();
+
+
+    updateScanStatus();
+
+  }
+
+
+  // ============================================
+  // 确认扫描结果
+  // ============================================
+
+  function confirmScan() {
+
+    // ------------------------------------------
+    // 确认商品序号
+    // ------------------------------------------
+
+    if (
+      currentStep === "serial_confirm"
+    ) {
 
       serial =
-        String(decodedText).trim();
+        pendingScanResult;
 
 
       document.getElementById(
         "serialDisplay"
-      ).innerText = serial;
+      ).innerText =
+        serial;
 
 
-      currentStep = "location";
+      pendingScanResult = "";
+
+
+      document.getElementById(
+        "scanConfirmArea"
+      ).classList.add("hidden");
+
+
+      currentStep =
+        "location_scan";
 
 
       updateScanStatus();
 
 
-      pauseScanner();
+      resumeScanner();
 
       return;
 
     }
 
 
-    // --------------------------------------------
-    // 第二次扫描：仓存位置
-    // --------------------------------------------
+    // ------------------------------------------
+    // 确认仓存位置
+    // ------------------------------------------
 
-    if (currentStep === "location") {
+    if (
+      currentStep === "location_confirm"
+    ) {
 
       location =
-        String(decodedText).trim();
+        pendingScanResult;
 
 
       document.getElementById(
         "locationDisplay"
-      ).innerText = location;
+      ).innerText =
+        location;
 
 
-      currentStep = "done";
+      pendingScanResult = "";
+
+
+      document.getElementById(
+        "scanConfirmArea"
+      ).classList.add("hidden");
+
+
+      currentStep =
+        "ready";
 
 
       updateScanStatus();
 
 
+      // 到这里已经不需要继续扫描
       pauseScanner();
 
       return;
@@ -418,12 +605,55 @@
 
 
   // ============================================
+  // 重新扫描
+  // ============================================
+
+  function retryScan() {
+
+    pendingScanResult = "";
+
+
+    document.getElementById(
+      "scanConfirmArea"
+    ).classList.add("hidden");
+
+
+    if (
+      currentStep === "serial_confirm"
+    ) {
+
+      currentStep =
+        "serial_scan";
+
+    }
+
+    else if (
+      currentStep === "location_confirm"
+    ) {
+
+      currentStep =
+        "location_scan";
+
+    }
+
+
+    updateScanStatus();
+
+
+    resumeScanner();
+
+  }
+
+
+  // ============================================
   // 扫描失败
   // ============================================
 
   function onScanFailure(error) {
 
-    // 正常情况下大量触发，不需要显示
+    // html5-qrcode 会持续调用这里，
+    // 正常情况下不显示错误。
+
   }
 
 
@@ -437,15 +667,72 @@
       return;
     }
 
-    scanner.pause(
-      true
-    );
+    try {
+
+      scanner.pause(true);
+
+    } catch (error) {
+
+      // 已经暂停时忽略
+
+    }
 
   }
 
 
   // ============================================
-  // 更新提示
+  // 恢复扫描
+  // ============================================
+
+  function resumeScanner() {
+
+    if (!scanner) {
+      return;
+    }
+
+    try {
+
+      scanner.resume();
+
+    } catch (error) {
+
+      // 如果恢复失败，重新启动扫描器
+      restartScanner();
+
+    }
+
+  }
+
+
+  // ============================================
+  // 重新启动扫描器
+  // ============================================
+
+  function restartScanner() {
+
+    if (!scanner) {
+      return;
+    }
+
+    scanner.stop()
+      .then(function() {
+
+        scanner.clear();
+
+        startScanner();
+
+      })
+      .catch(function() {
+
+        startScanner();
+
+      });
+
+  }
+
+
+  // ============================================
+  // 更新扫描提示
   // ============================================
 
   function updateScanStatus() {
@@ -456,42 +743,69 @@
       );
 
 
-    if (currentStep === "serial") {
+    const title =
+      document.getElementById(
+        "stepTitle"
+      );
+
+
+    if (
+      currentStep === "serial_scan"
+    ) {
+
+      title.innerText =
+        "第一步：扫描商品条码";
 
       status.innerText =
         "请扫描商品条码";
 
     }
 
-    else if (currentStep === "location") {
+    else if (
+      currentStep === "serial_confirm"
+    ) {
+
+      title.innerText =
+        "第一步：确认商品";
 
       status.innerText =
-        "商品已识别，请扫描仓存位置条码";
+        "请确认扫描结果是否正确";
+
+    }
+
+    else if (
+      currentStep === "location_scan"
+    ) {
+
+      title.innerText =
+        "第二步：扫描仓存位置";
+
+      status.innerText =
+        "商品已确认，请扫描仓存位置条码";
+
+    }
+
+    else if (
+      currentStep === "location_confirm"
+    ) {
+
+      title.innerText =
+        "第二步：确认仓存位置";
+
+      status.innerText =
+        "请确认扫描结果是否正确";
 
     }
 
     else {
 
+      title.innerText =
+        "扫码完成";
+
       status.innerText =
-        "商品和仓存位置已识别，请输入数量";
+        "商品和仓存位置已确认，请输入数量";
 
     }
-
-  }
-
-
-  // ============================================
-  // 重新开始扫描
-  // ============================================
-
-  function resumeScanner() {
-
-    if (!scanner) {
-      return;
-    }
-
-
-    scanner.resume();
 
   }
 
@@ -505,14 +819,14 @@
     hideMessages();
 
 
-    // --------------------------------------------
-    // 检查商品序号
-    // --------------------------------------------
+    // ------------------------------------------
+    // 检查商品
+    // ------------------------------------------
 
     if (!serial) {
 
       showError(
-        "请先扫描商品条码"
+        "请先扫描并确认商品序号"
       );
 
       return;
@@ -520,14 +834,14 @@
     }
 
 
-    // --------------------------------------------
-    // 检查仓存位置
-    // --------------------------------------------
+    // ------------------------------------------
+    // 检查位置
+    // ------------------------------------------
 
     if (!location) {
 
       showError(
-        "请先扫描仓存位置条码"
+        "请先扫描并确认仓存位置"
       );
 
       return;
@@ -535,9 +849,9 @@
     }
 
 
-    // --------------------------------------------
+    // ------------------------------------------
     // 检查数量
-    // --------------------------------------------
+    // ------------------------------------------
 
     const quantity =
       document.getElementById(
@@ -570,14 +884,15 @@
     }
 
 
-    // --------------------------------------------
+    // ------------------------------------------
     // 防止重复点击
-    // --------------------------------------------
+    // ------------------------------------------
 
     const button =
       document.querySelector(
         ".primary"
       );
+
 
     button.disabled = true;
 
@@ -586,10 +901,6 @@
 
 
     try {
-
-      // ------------------------------------------
-      // 发送给 Apps Script
-      // ------------------------------------------
 
       const response =
         await fetch(
@@ -621,10 +932,6 @@
           }
         );
 
-
-      // ------------------------------------------
-      // 读取返回结果
-      // ------------------------------------------
 
       const result =
         await response.json();
@@ -743,7 +1050,7 @@
 
 
   // ============================================
-  // 重置
+  // 完全重新开始
   // ============================================
 
   function resetAll() {
@@ -752,7 +1059,10 @@
 
     location = "";
 
-    currentStep = "serial";
+    pendingScanResult = "";
+
+    currentStep =
+      "serial_scan";
 
 
     document.getElementById(
@@ -773,10 +1083,16 @@
       "";
 
 
+    document.getElementById(
+      "scanConfirmArea"
+    ).classList.add("hidden");
+
+
     const button =
       document.querySelector(
         ".primary"
       );
+
 
     button.disabled = false;
 
@@ -806,8 +1122,10 @@
         "successMessage"
       );
 
+
     element.innerText =
       message;
+
 
     element.style.display =
       "block";
@@ -826,8 +1144,10 @@
         "errorMessage"
       );
 
+
     element.innerText =
       "❌ " + message;
+
 
     element.style.display =
       "block";
