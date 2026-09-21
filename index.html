@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>闲鱼库存扫码</title>
+
+  <script
+    src="https://unpkg.com/html5-qrcode"
+    type="text/javascript">
+  </script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+      color: #222;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 24px;
+      margin: 10px 0 20px;
+    }
+
+    .scanner-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    #reader {
+      width: 100%;
+    }
+
+    .result-box {
+      margin-top: 20px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .result-title {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 8px;
+    }
+
+    .result {
+      font-size: 32px;
+      font-weight: 700;
+      word-break: break-all;
+      min-height: 42px;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #777;
+      line-height: 1.5;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #222;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    button:active {
+      opacity: 0.8;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>闲鱼库存扫码</h1>
+
+    <div class="scanner-box">
+
+      <div id="reader"></div>
+
+    </div>
+
+    <div class="result-box">
+
+      <div class="result-title">
+        扫描结果
+      </div>
+
+      <div
+        id="result"
+        class="result">
+        等待扫描
+      </div>
+
+      <div
+        id="status"
+        class="status">
+        正在启动摄像头……
+      </div>
+
+      <button
+        onclick="startScanner()">
+        重新扫描
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    let scanner = null;
+
+    let scanning = false;
+
+
+    function startScanner() {
+
+      const resultElement =
+        document.getElementById("result");
+
+      const statusElement =
+        document.getElementById("status");
+
+
+      resultElement.textContent =
+        "等待扫描";
+
+      statusElement.textContent =
+        "正在启动摄像头……";
+
+
+      if (scanner) {
+
+        try {
+          scanner.clear();
+        } catch (e) {}
+
+      }
+
+
+      scanner =
+        new Html5Qrcode("reader");
+
+
+      const config = {
+
+        fps: 10,
+
+        qrbox: function(
+          viewfinderWidth,
+          viewfinderHeight
+        ) {
+
+          const width =
+            Math.min(
+              viewfinderWidth * 0.85,
+              350
+            );
+
+          const height =
+            Math.min(
+              viewfinderHeight * 0.35,
+              150
+            );
+
+          return {
+            width: width,
+            height: height
+          };
+
+        },
+
+        formatsToSupport: [
+
+          Html5QrcodeSupportedFormats.CODE_128,
+
+          Html5QrcodeSupportedFormats.CODE_39,
+
+          Html5QrcodeSupportedFormats.EAN_13,
+
+          Html5QrcodeSupportedFormats.EAN_8,
+
+          Html5QrcodeSupportedFormats.UPC_A,
+
+          Html5QrcodeSupportedFormats.UPC_E
+
+        ]
+
+      };
+
+
+      scanner.start(
+
+        {
+          facingMode: "environment"
+        },
+
+        config,
+
+
+        function(decodedText) {
+
+          if (scanning) {
+            return;
+          }
+
+          scanning = true;
+
+
+          resultElement.textContent =
+            decodedText;
+
+          statusElement.textContent =
+            "扫描成功";
+
+
+          try {
+            scanner.pause(true);
+          } catch (e) {}
+
+        },
+
+
+        function(errorMessage) {
+
+          // 扫描过程中无法识别时不显示错误
+
+        }
+
+      )
+
+      .then(function() {
+
+        scanning = false;
+
+        statusElement.textContent =
+          "摄像头已启动，请扫描商品条码";
+
+      })
+
+      .catch(function(error) {
+
+        statusElement.textContent =
+          "无法启动摄像头：" + error;
+
+      });
+
+    }
+
+
+    window.onload = function() {
+
+      startScanner();
+
+    };
+
+  </script>
+
+</body>
+
+</html>
