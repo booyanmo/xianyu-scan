@@ -1,39 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>闲鱼库存扫码</title>
 
-  <script
-    src="https://unpkg.com/html5-qrcode"
-    type="text/javascript">
-  </script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, "Helvetica Neue", Arial, sans-serif;
       margin: 0;
       padding: 20px;
       background: #f5f5f5;
       color: #222;
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Arial,
-        sans-serif;
     }
 
     .container {
@@ -43,366 +25,836 @@
 
     h1 {
       text-align: center;
-      font-size: 24px;
       margin: 10px 0 20px;
+      font-size: 24px;
     }
 
-    .scanner-box {
+    .card {
       background: #fff;
-      border-radius: 16px;
-      padding: 12px;
-      box-shadow:
-        0 2px 10px rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .value {
+      font-size: 20px;
+      font-weight: 600;
+      min-height: 28px;
+      word-break: break-all;
     }
 
     #reader {
       width: 100%;
+      margin-top: 10px;
     }
 
-    .result-box {
-      margin-top: 20px;
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px;
+    .scan-status {
       text-align: center;
-      box-shadow:
-        0 2px 10px rgba(0, 0, 0, 0.08);
-    }
-
-    .result-title {
+      margin: 12px 0;
+      color: #666;
       font-size: 14px;
-      color: #777;
-      margin-bottom: 8px;
     }
 
-    .result {
-      font-size: 32px;
-      font-weight: 700;
-      word-break: break-all;
-      min-height: 42px;
-    }
-
-    .status {
-      margin-top: 12px;
-      font-size: 14px;
-      color: #777;
-      line-height: 1.5;
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 5px;
     }
 
     button {
       width: 100%;
-      margin-top: 15px;
       padding: 14px;
+      margin-top: 10px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .primary {
       background: #222;
       color: #fff;
-      font-size: 16px;
     }
 
-    button:active {
-      opacity: 0.8;
+    .secondary {
+      background: #e8e8e8;
+      color: #222;
     }
 
+    .success {
+      background: #e8f7e8;
+      color: #176b17;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .error {
+      background: #fdeaea;
+      color: #a00000;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .step {
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
   </style>
-
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h1>闲鱼库存扫码</h1>
+  <h1>闲鱼库存扫码</h1>
 
-    <div class="scanner-box">
 
-      <div id="reader"></div>
+  <!-- =========================
+       当前操作
+       ========================= -->
 
+  <div class="card">
+
+    <div class="step">
+      操作：入库
     </div>
 
-    <div class="result-box">
+    <div class="label">
+      商品序号
+    </div>
 
-      <div class="result-title">
-        扫描结果
-      </div>
+    <div
+      id="serialDisplay"
+      class="value">
+      等待扫描
+    </div>
 
-      <div
-        id="result"
-        class="result">
-        等待扫描
-      </div>
+    <div class="label" style="margin-top:15px;">
+      仓存位置
+    </div>
 
-      <div
-        id="status"
-        class="status">
-        正在测试与闲鱼工作簿的连接……
-      </div>
-
-      <button
-        onclick="testConnection()">
-        测试连接
-      </button>
-
-      <button
-        onclick="startScanner()">
-        重新扫描
-      </button>
-
+    <div
+      id="locationDisplay"
+      class="value">
+      等待扫描
     </div>
 
   </div>
 
 
-  <script>
+  <!-- =========================
+       扫码区域
+       ========================= -->
 
-    /*
-     * Apps Script Web App 地址
-     */
-    const APPS_SCRIPT_URL =
-      "https://script.google.com/macros/s/AKfycbykJPjh3aCJrypFpdMa_SmKA6fw2hbfZu-K5V1BRk0dZHEL6hPm_X6ICibQPnPUMvF-/exec";
+  <div class="card">
 
+    <div class="step">
+      扫码
+    </div>
 
-    let scanner = null;
+    <div
+      id="reader">
+    </div>
 
-    let scanning = false;
+    <div
+      id="scanStatus"
+      class="scan-status">
+      正在准备摄像头……
+    </div>
 
-
-    /*
-     * 测试：
-     * GitHub Pages → Apps Script doPost(e)
-     */
-    async function testConnection() {
-
-      const statusElement =
-        document.getElementById("status");
-
-      statusElement.textContent =
-        "正在连接 Apps Script……";
+  </div>
 
 
-      try {
+  <!-- =========================
+       数量
+       ========================= -->
 
-        const response =
-          await fetch(
-            APPS_SCRIPT_URL,
-            {
-              method: "POST",
+  <div class="card">
 
-              headers: {
-                "Content-Type":
-                  "text/plain;charset=utf-8"
-              },
+    <div class="label">
+      入库数量
+    </div>
 
-              body: JSON.stringify({
-                action: "test"
-              })
-            }
-          );
+    <input
+      id="quantityInput"
+      type="number"
+      min="1"
+      step="1"
+      placeholder="请输入数量">
 
+    <button
+      class="primary"
+      onclick="executeStockIn()">
+      执行入库
+    </button>
 
-        const text =
-          await response.text();
+    <button
+      class="secondary"
+      onclick="resetAll()">
+      重新开始
+    </button>
 
+    <button
+      class="secondary"
+      onclick="testConnection()">
+      测试连接
+    </button>
 
-        let data;
+    <div
+      id="successMessage"
+      class="success">
+    </div>
 
-        try {
+    <div
+      id="errorMessage"
+      class="error">
+    </div>
 
-          data = JSON.parse(text);
+  </div>
 
-        } catch (e) {
-
-          throw new Error(
-            "服务器返回的内容不是 JSON：" +
-            text
-          );
-
-        }
-
-
-        if (data.success) {
-
-          statusElement.textContent =
-            "✓ 手机前端与 Apps Script 通信成功：" +
-            data.message;
-
-        } else {
-
-          statusElement.textContent =
-            "✗ Apps Script 返回失败：" +
-            (data.message || "未知错误");
-
-        }
+</div>
 
 
-      } catch (error) {
+<script>
 
-        statusElement.textContent =
-          "✗ 通信失败：" +
-          error.message;
+  // ============================================
+  // Apps Script Web App 地址
+  // ============================================
 
-        console.error(
-          "Apps Script 通信错误：",
-          error
+  const APPS_SCRIPT_URL =
+    "https://script.google.com/macros/s/AKfycbykJPjh3aCJrypFpdMa_SmKA6fw2hbfZu-K5V1BRk0dZHEL6hPm_X6ICibQPnPUMvF-/exec";
+
+
+  // ============================================
+  // 当前扫描状态
+  // ============================================
+
+  let scanner = null;
+
+  let currentStep = "serial";
+
+  let serial = "";
+
+  let location = "";
+
+
+  // ============================================
+  // 页面加载
+  // ============================================
+
+  window.addEventListener("load", function() {
+
+    startScanner();
+
+  });
+
+
+  // ============================================
+  // 启动摄像头
+  // ============================================
+
+  function startScanner() {
+
+    scanner =
+      new Html5Qrcode("reader");
+
+
+    const config = {
+
+      fps: 10,
+
+      qrbox: function(viewfinderWidth, viewfinderHeight) {
+
+        return {
+          width: Math.min(
+            Math.floor(viewfinderWidth * 0.85),
+            350
+          ),
+
+          height: Math.min(
+            Math.floor(viewfinderHeight * 0.35),
+            150
+          )
+        };
+
+      },
+
+      formatsToSupport: [
+
+        Html5QrcodeSupportedFormats.CODE_128,
+
+        Html5QrcodeSupportedFormats.CODE_39,
+
+        Html5QrcodeSupportedFormats.EAN_13,
+
+        Html5QrcodeSupportedFormats.EAN_8,
+
+        Html5QrcodeSupportedFormats.UPC_A,
+
+        Html5QrcodeSupportedFormats.UPC_E
+
+      ]
+
+    };
+
+
+    scanner.start(
+
+      {
+        facingMode: "environment"
+      },
+
+      config,
+
+      onScanSuccess,
+
+      onScanFailure
+
+    )
+
+    .then(function() {
+
+      updateScanStatus();
+
+    })
+
+    .catch(function(error) {
+
+      document.getElementById("scanStatus").innerText =
+        "无法启动摄像头：" + error;
+
+    });
+
+  }
+
+
+  // ============================================
+  // 扫描成功
+  // ============================================
+
+  function onScanSuccess(decodedText) {
+
+    // 防止同一个条码连续触发
+    if (!scanner) {
+      return;
+    }
+
+
+    // --------------------------------------------
+    // 第一次扫描：商品序号
+    // --------------------------------------------
+
+    if (currentStep === "serial") {
+
+      serial =
+        String(decodedText).trim();
+
+
+      document.getElementById(
+        "serialDisplay"
+      ).innerText = serial;
+
+
+      currentStep = "location";
+
+
+      updateScanStatus();
+
+
+      pauseScanner();
+
+      return;
+
+    }
+
+
+    // --------------------------------------------
+    // 第二次扫描：仓存位置
+    // --------------------------------------------
+
+    if (currentStep === "location") {
+
+      location =
+        String(decodedText).trim();
+
+
+      document.getElementById(
+        "locationDisplay"
+      ).innerText = location;
+
+
+      currentStep = "done";
+
+
+      updateScanStatus();
+
+
+      pauseScanner();
+
+      return;
+
+    }
+
+  }
+
+
+  // ============================================
+  // 扫描失败
+  // ============================================
+
+  function onScanFailure(error) {
+
+    // 正常情况下大量触发，不需要显示
+  }
+
+
+  // ============================================
+  // 暂停扫描
+  // ============================================
+
+  function pauseScanner() {
+
+    if (!scanner) {
+      return;
+    }
+
+    scanner.pause(
+      true
+    );
+
+  }
+
+
+  // ============================================
+  // 更新提示
+  // ============================================
+
+  function updateScanStatus() {
+
+    const status =
+      document.getElementById(
+        "scanStatus"
+      );
+
+
+    if (currentStep === "serial") {
+
+      status.innerText =
+        "请扫描商品条码";
+
+    }
+
+    else if (currentStep === "location") {
+
+      status.innerText =
+        "商品已识别，请扫描仓存位置条码";
+
+    }
+
+    else {
+
+      status.innerText =
+        "商品和仓存位置已识别，请输入数量";
+
+    }
+
+  }
+
+
+  // ============================================
+  // 重新开始扫描
+  // ============================================
+
+  function resumeScanner() {
+
+    if (!scanner) {
+      return;
+    }
+
+
+    scanner.resume();
+
+  }
+
+
+  // ============================================
+  // 执行入库
+  // ============================================
+
+  async function executeStockIn() {
+
+    hideMessages();
+
+
+    // --------------------------------------------
+    // 检查商品序号
+    // --------------------------------------------
+
+    if (!serial) {
+
+      showError(
+        "请先扫描商品条码"
+      );
+
+      return;
+
+    }
+
+
+    // --------------------------------------------
+    // 检查仓存位置
+    // --------------------------------------------
+
+    if (!location) {
+
+      showError(
+        "请先扫描仓存位置条码"
+      );
+
+      return;
+
+    }
+
+
+    // --------------------------------------------
+    // 检查数量
+    // --------------------------------------------
+
+    const quantity =
+      document.getElementById(
+        "quantityInput"
+      ).value.trim();
+
+
+    if (!quantity) {
+
+      showError(
+        "请输入入库数量"
+      );
+
+      return;
+
+    }
+
+
+    if (
+      Number(quantity) <= 0 ||
+      !Number.isInteger(Number(quantity))
+    ) {
+
+      showError(
+        "入库数量必须是大于 0 的整数"
+      );
+
+      return;
+
+    }
+
+
+    // --------------------------------------------
+    // 防止重复点击
+    // --------------------------------------------
+
+    const button =
+      document.querySelector(
+        ".primary"
+      );
+
+    button.disabled = true;
+
+    button.innerText =
+      "正在执行入库……";
+
+
+    try {
+
+      // ------------------------------------------
+      // 发送给 Apps Script
+      // ------------------------------------------
+
+      const response =
+        await fetch(
+          APPS_SCRIPT_URL,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+
+            body: JSON.stringify({
+
+              action: "inventory",
+
+              serial: serial,
+
+              oldLocation: "",
+
+              newLocation: location,
+
+              quantity: Number(quantity),
+
+              operationType: "入库"
+
+            })
+
+          }
+        );
+
+
+      // ------------------------------------------
+      // 读取返回结果
+      // ------------------------------------------
+
+      const result =
+        await response.json();
+
+
+      if (result.success) {
+
+        showSuccess(
+          result.message ||
+          "入库成功"
+        );
+
+
+        button.innerText =
+          "入库成功";
+
+
+      } else {
+
+        showError(
+          result.message ||
+          "入库失败"
+        );
+
+
+        button.disabled = false;
+
+        button.innerText =
+          "执行入库";
+
+      }
+
+    }
+
+    catch (error) {
+
+      showError(
+        "通信失败：" +
+        error.message
+      );
+
+
+      button.disabled = false;
+
+      button.innerText =
+        "执行入库";
+
+    }
+
+  }
+
+
+  // ============================================
+  // 测试连接
+  // ============================================
+
+  async function testConnection() {
+
+    hideMessages();
+
+
+    try {
+
+      const response =
+        await fetch(
+          APPS_SCRIPT_URL,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+
+            body: JSON.stringify({
+
+              action: "test"
+
+            })
+
+          }
+        );
+
+
+      const result =
+        await response.json();
+
+
+      if (result.success) {
+
+        showSuccess(
+          "✓ " + result.message
+        );
+
+      } else {
+
+        showError(
+          result.message ||
+          "连接失败"
         );
 
       }
 
     }
 
+    catch (error) {
 
-    function startScanner() {
-
-      const resultElement =
-        document.getElementById("result");
-
-      const statusElement =
-        document.getElementById("status");
-
-
-      resultElement.textContent =
-        "等待扫描";
-
-
-      statusElement.textContent =
-        "正在启动摄像头……";
-
-
-      scanning = false;
-
-
-      if (scanner) {
-
-        try {
-          scanner.clear();
-        } catch (e) {}
-
-      }
-
-
-      scanner =
-        new Html5Qrcode("reader");
-
-
-      const config = {
-
-        fps: 10,
-
-        qrbox: function(
-          viewfinderWidth,
-          viewfinderHeight
-        ) {
-
-          const width =
-            Math.min(
-              viewfinderWidth * 0.85,
-              350
-            );
-
-          const height =
-            Math.min(
-              viewfinderHeight * 0.35,
-              150
-            );
-
-          return {
-            width: width,
-            height: height
-          };
-
-        },
-
-        formatsToSupport: [
-
-          Html5QrcodeSupportedFormats.CODE_128,
-
-          Html5QrcodeSupportedFormats.CODE_39,
-
-          Html5QrcodeSupportedFormats.EAN_13,
-
-          Html5QrcodeSupportedFormats.EAN_8,
-
-          Html5QrcodeSupportedFormats.UPC_A,
-
-          Html5QrcodeSupportedFormats.UPC_E
-
-        ]
-
-      };
-
-
-      scanner.start(
-
-        {
-          facingMode: "environment"
-        },
-
-        config,
-
-
-        function(decodedText) {
-
-          if (scanning) {
-            return;
-          }
-
-          scanning = true;
-
-
-          resultElement.textContent =
-            decodedText;
-
-          statusElement.textContent =
-            "扫描成功";
-
-
-          try {
-            scanner.pause(true);
-          } catch (e) {}
-
-        },
-
-
-        function(errorMessage) {
-
-          // 扫描过程中无法识别时不显示错误
-
-        }
-
-      )
-
-      .then(function() {
-
-        scanning = false;
-
-        statusElement.textContent =
-          "摄像头已启动，请扫描商品条码";
-
-      })
-
-      .catch(function(error) {
-
-        statusElement.textContent =
-          "无法启动摄像头：" + error;
-
-      });
+      showError(
+        "通信失败：" +
+        error.message
+      );
 
     }
 
+  }
 
-    window.onload = function() {
 
-      startScanner();
+  // ============================================
+  // 重置
+  // ============================================
 
-      /*
-       * 页面打开后自动测试一次通信
-       */
-      testConnection();
+  function resetAll() {
 
-    };
+    serial = "";
 
-  </script>
+    location = "";
+
+    currentStep = "serial";
+
+
+    document.getElementById(
+      "serialDisplay"
+    ).innerText =
+      "等待扫描";
+
+
+    document.getElementById(
+      "locationDisplay"
+    ).innerText =
+      "等待扫描";
+
+
+    document.getElementById(
+      "quantityInput"
+    ).value =
+      "";
+
+
+    const button =
+      document.querySelector(
+        ".primary"
+      );
+
+    button.disabled = false;
+
+    button.innerText =
+      "执行入库";
+
+
+    hideMessages();
+
+
+    updateScanStatus();
+
+
+    resumeScanner();
+
+  }
+
+
+  // ============================================
+  // 成功提示
+  // ============================================
+
+  function showSuccess(message) {
+
+    const element =
+      document.getElementById(
+        "successMessage"
+      );
+
+    element.innerText =
+      message;
+
+    element.style.display =
+      "block";
+
+  }
+
+
+  // ============================================
+  // 错误提示
+  // ============================================
+
+  function showError(message) {
+
+    const element =
+      document.getElementById(
+        "errorMessage"
+      );
+
+    element.innerText =
+      "❌ " + message;
+
+    element.style.display =
+      "block";
+
+  }
+
+
+  // ============================================
+  // 隐藏提示
+  // ============================================
+
+  function hideMessages() {
+
+    document.getElementById(
+      "successMessage"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "errorMessage"
+    ).style.display =
+      "none";
+
+  }
+
+</script>
 
 </body>
-
 </html>
