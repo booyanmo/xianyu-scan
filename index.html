@@ -14,7 +14,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
                    Roboto, "Helvetica Neue", Arial, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 10px;
       background: #f5f5f5;
       color: #222;
     }
@@ -26,65 +26,87 @@
 
     h1 {
       text-align: center;
-      margin: 10px 0 20px;
-      font-size: 24px;
+      margin: 4px 0 10px;
+      font-size: 22px;
     }
 
     .card {
       background: #fff;
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 15px;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
     .step {
       font-weight: 600;
-      font-size: 17px;
-      margin-bottom: 12px;
+      font-size: 16px;
+      margin-bottom: 8px;
     }
 
     .label {
-      font-size: 14px;
+      font-size: 13px;
       color: #666;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .value {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 600;
-      min-height: 28px;
+      min-height: 24px;
       word-break: break-all;
     }
 
+    /*
+     * 摄像头区域
+     * 固定较矮的高度，避免页面被摄像头撑得太长
+     */
     #reader {
       width: 100%;
-      margin-top: 10px;
+      height: 200px;
+      margin-top: 6px;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    /*
+     * 让 html5-qrcode 的视频区域
+     * 尽量填满 200px 高度
+     */
+    #reader video {
+      width: 100% !important;
+      height: 200px !important;
+      object-fit: cover !important;
+      border-radius: 8px;
+    }
+
+    #reader__dashboard {
+      margin-top: 4px !important;
     }
 
     .scan-status {
       text-align: center;
-      margin: 12px 0;
+      margin: 7px 0;
       color: #666;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .result-box {
       background: #f7f7f7;
       border-radius: 8px;
-      padding: 15px;
-      margin-top: 12px;
+      padding: 10px;
+      margin-top: 8px;
       text-align: center;
     }
 
     .result-label {
-      font-size: 13px;
+      font-size: 12px;
       color: #666;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
     }
 
     .result-value {
-      font-size: 28px;
+      font-size: 25px;
       font-weight: 700;
       word-break: break-all;
     }
@@ -92,20 +114,20 @@
     input {
       width: 100%;
       box-sizing: border-box;
-      padding: 13px;
-      font-size: 18px;
+      padding: 11px;
+      font-size: 17px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      margin-top: 5px;
+      margin-top: 4px;
     }
 
     button {
       width: 100%;
-      padding: 14px;
-      margin-top: 10px;
+      padding: 11px;
+      margin-top: 7px;
       border: none;
       border-radius: 8px;
-      font-size: 17px;
+      font-size: 16px;
       cursor: pointer;
     }
 
@@ -126,9 +148,9 @@
     .success {
       background: #e8f7e8;
       color: #176b17;
-      padding: 12px;
+      padding: 10px;
       border-radius: 8px;
-      margin-top: 12px;
+      margin-top: 8px;
       display: none;
       word-break: break-all;
     }
@@ -136,15 +158,51 @@
     .error {
       background: #fdeaea;
       color: #a00000;
-      padding: 12px;
+      padding: 10px;
       border-radius: 8px;
-      margin-top: 12px;
+      margin-top: 8px;
       display: none;
       word-break: break-all;
     }
 
     .hidden {
       display: none !important;
+    }
+
+    /*
+     * 手机屏幕较矮时进一步压缩摄像头
+     */
+    @media (max-height: 700px) {
+      body {
+        padding: 7px;
+      }
+
+      h1 {
+        margin: 2px 0 7px;
+        font-size: 20px;
+      }
+
+      .card {
+        padding: 10px;
+        margin-bottom: 7px;
+      }
+
+      #reader {
+        height: 170px;
+      }
+
+      #reader video {
+        height: 170px !important;
+      }
+
+      .scan-status {
+        margin: 5px 0;
+      }
+
+      button {
+        padding: 9px;
+        margin-top: 5px;
+      }
     }
   </style>
 </head>
@@ -175,7 +233,7 @@
 
     <div
       class="label"
-      style="margin-top:15px;">
+      style="margin-top:10px;">
       仓存位置
     </div>
 
