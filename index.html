@@ -1,20 +1,24 @@
-```html
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>闲鱼库存扫码</title>
+  <title>BYbuyerstore莫莫店</title>
 
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
                    Roboto, "Helvetica Neue", Arial, sans-serif;
       margin: 0;
-      padding: 10px;
+      padding: 8px;
       background: #f5f5f5;
       color: #222;
     }
@@ -24,47 +28,93 @@
       margin: 0 auto;
     }
 
+    /* =========================
+       顶部标题
+       ========================= */
+
     h1 {
       text-align: center;
-      margin: 4px 0 10px;
-      font-size: 22px;
+      margin: 3px 0 8px;
+      font-size: 21px;
+      font-weight: 700;
     }
 
-    .card {
+
+    /* =========================
+       当前操作信息
+       ========================= */
+
+    .info-card {
       background: #fff;
       border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 9px 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .operation-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+    }
+
+    .operation-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .operation-tag {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: #f0f0f0;
+      color: #555;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      min-height: 24px;
+    }
+
+    .info-label {
+      width: 48px;
+      flex-shrink: 0;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .info-value {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+
+    /* =========================
+       扫描区域
+       ========================= */
+
+    .scan-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
     .step {
       font-weight: 600;
-      font-size: 16px;
-      margin-bottom: 8px;
+      font-size: 15px;
+      margin-bottom: 6px;
     }
 
-    .label {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 4px;
-    }
-
-    .value {
-      font-size: 18px;
-      font-weight: 600;
-      min-height: 24px;
-      word-break: break-all;
-    }
-
-    /*
-     * 摄像头显示区域
-     * 这里只控制页面上摄像头显示的高度
-     */
     #reader {
       width: 100%;
       height: 260px;
-      margin-top: 6px;
+      margin-top: 4px;
       overflow: hidden;
       border-radius: 8px;
     }
@@ -77,53 +127,86 @@
     }
 
     #reader__dashboard {
-      margin-top: 4px !important;
+      margin-top: 3px !important;
     }
 
     .scan-status {
       text-align: center;
-      margin: 7px 0;
+      margin: 5px 0;
       color: #666;
-      font-size: 13px;
+      font-size: 12px;
     }
+
+
+    /* =========================
+       扫描结果
+       ========================= */
 
     .result-box {
       background: #f7f7f7;
       border-radius: 8px;
-      padding: 10px;
-      margin-top: 8px;
+      padding: 8px;
+      margin-top: 6px;
       text-align: center;
     }
 
     .result-label {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 2px;
+    }
+
+    .result-value {
+      font-size: 23px;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+
+    /* =========================
+       数量区域
+       ========================= */
+
+    .quantity-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 9px 10px;
+      margin-bottom: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .quantity-label {
       font-size: 12px;
       color: #666;
       margin-bottom: 3px;
     }
 
-    .result-value {
-      font-size: 25px;
-      font-weight: 700;
-      word-break: break-all;
-    }
-
     input {
       width: 100%;
-      box-sizing: border-box;
-      padding: 11px;
+      padding: 9px 10px;
       font-size: 17px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      margin-top: 4px;
+      margin-top: 2px;
+      outline: none;
     }
+
+    input:focus {
+      border-color: #888;
+    }
+
+
+    /* =========================
+       按钮
+       ========================= */
 
     button {
       width: 100%;
-      padding: 11px;
-      margin-top: 7px;
+      padding: 9px;
+      margin-top: 5px;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
     }
 
@@ -141,46 +224,93 @@
       color: #222;
     }
 
+
+    /* =========================
+       底部小按钮区域
+       ========================= */
+
+    .bottom-tools {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      margin-top: 3px;
+      margin-bottom: 3px;
+    }
+
+    .small-button {
+      width: auto;
+      padding: 4px 8px;
+      margin: 0;
+      background: transparent;
+      color: #888;
+      font-size: 11px;
+    }
+
+    .small-button:active {
+      background: #e8e8e8;
+      border-radius: 5px;
+    }
+
+
+    /* =========================
+       成功 / 错误提示
+       ========================= */
+
     .success {
       background: #e8f7e8;
       color: #176b17;
-      padding: 10px;
+      padding: 8px;
       border-radius: 8px;
-      margin-top: 8px;
+      margin-top: 6px;
       display: none;
       word-break: break-all;
+      font-size: 13px;
     }
 
     .error {
       background: #fdeaea;
       color: #a00000;
-      padding: 10px;
+      padding: 8px;
       border-radius: 8px;
-      margin-top: 8px;
+      margin-top: 6px;
       display: none;
       word-break: break-all;
+      font-size: 13px;
     }
 
     .hidden {
       display: none !important;
     }
 
-    /*
-     * 手机屏幕较矮时进一步压缩摄像头
-     */
+
+    /* =========================
+       iPhone 等较矮屏幕
+       ========================= */
+
     @media (max-height: 700px) {
+
       body {
-        padding: 7px;
+        padding: 6px;
       }
 
       h1 {
-        margin: 2px 0 7px;
+        margin: 2px 0 6px;
         font-size: 20px;
       }
 
-      .card {
-        padding: 10px;
-        margin-bottom: 7px;
+      .info-card {
+        padding: 7px 10px;
+        margin-bottom: 6px;
+      }
+
+      .operation-line {
+        margin-bottom: 5px;
+      }
+
+      .scan-card {
+        padding: 8px;
+        margin-bottom: 6px;
       }
 
       #reader {
@@ -192,156 +322,209 @@
       }
 
       .scan-status {
-        margin: 5px 0;
+        margin: 4px 0;
+      }
+
+      .quantity-card {
+        padding: 7px 8px;
       }
 
       button {
-        padding: 9px;
-        margin-top: 5px;
+        padding: 8px;
+        margin-top: 4px;
       }
+
     }
+
   </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-  <h1>闲鱼库存扫码</h1>
+  <!-- =========================
+       店铺标题
+       ========================= -->
 
-  <!-- 当前操作 -->
+  <h1>BYbuyerstore莫莫店</h1>
 
-  <div class="card">
+  <!-- =========================
+       当前操作信息
+       ========================= -->
 
-    <div class="step">
-      操作：入库
-    </div>
+  <div class="info-card">
 
-    <div class="label">
-      商品序号
-    </div>
+```
+<div class="operation-line">
 
-    <div
-      id="serialDisplay"
-      class="value">
-      等待扫描
-    </div>
-
-    <div
-      class="label"
-      style="margin-top:10px;">
-      仓存位置
-    </div>
-
-    <div
-      id="locationDisplay"
-      class="value">
-      等待扫描
-    </div>
-
+  <div class="operation-title">
+    库存操作
   </div>
 
-
-  <!-- 扫描区域 -->
-
-  <div class="card">
-
-    <div
-      id="stepTitle"
-      class="step">
-      第一步：扫描商品条码
-    </div>
-
-    <div id="reader"></div>
-
-    <div
-      id="scanStatus"
-      class="scan-status">
-      正在准备摄像头……
-    </div>
-
-
-    <!-- 扫描结果确认 -->
-
-    <div
-      id="resultBox"
-      class="result-box hidden">
-
-      <div class="result-label">
-        扫描结果
-      </div>
-
-      <div
-        id="resultValue"
-        class="result-value">
-      </div>
-
-      <button
-        id="confirmButton"
-        class="primary"
-        onclick="confirmScan()">
-        确认
-      </button>
-
-      <button
-        class="secondary"
-        onclick="retryScan()">
-        重新扫描
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <!-- 数量 -->
-
-  <div class="card">
-
-    <div class="label">
-      入库数量
-    </div>
-
-    <input
-      id="quantityInput"
-      type="number"
-      min="1"
-      step="1"
-      placeholder="请输入数量">
-
-    <button
-      id="stockInButton"
-      class="primary"
-      onclick="executeStockIn()">
-      执行入库
-    </button>
-
-    <button
-      class="secondary"
-      onclick="resetAll()">
-      重新开始
-    </button>
-
-    <button
-      class="secondary"
-      onclick="testConnection()">
-      测试连接
-    </button>
-
-    <div
-      id="successMessage"
-      class="success">
-    </div>
-
-    <div
-      id="errorMessage"
-      class="error">
-    </div>
-
+  <div
+    id="operationTag"
+    class="operation-tag">
+    入库
   </div>
 
 </div>
 
+
+<div class="info-row">
+
+  <div class="info-label">
+    商品
+  </div>
+
+  <div
+    id="serialDisplay"
+    class="info-value">
+    等待扫描
+  </div>
+
+</div>
+
+
+<div class="info-row">
+
+  <div class="info-label">
+    仓位
+  </div>
+
+  <div
+    id="locationDisplay"
+    class="info-value">
+    等待扫描
+  </div>
+
+</div>
+```
+
+  </div>
+
+  <!-- =========================
+       扫描区域
+       ========================= -->
+
+  <div class="scan-card">
+
+```
+<div
+  id="stepTitle"
+  class="step">
+  第一步：扫描商品条码
+</div>
+
+
+<div id="reader"></div>
+
+
+<div
+  id="scanStatus"
+  class="scan-status">
+  正在准备摄像头……
+</div>
+
+
+<!-- 扫描结果确认 -->
+
+<div
+  id="resultBox"
+  class="result-box hidden">
+
+  <div class="result-label">
+    扫描结果
+  </div>
+
+  <div
+    id="resultValue"
+    class="result-value">
+  </div>
+
+  <button
+    id="confirmButton"
+    class="primary"
+    onclick="confirmScan()">
+    确认
+  </button>
+
+  <button
+    class="secondary"
+    onclick="retryScan()">
+    重新扫描
+  </button>
+
+</div>
+```
+
+  </div>
+
+  <!-- =========================
+       数量
+       ========================= -->
+
+  <div class="quantity-card">
+
+```
+<div class="quantity-label">
+  入库数量
+</div>
+
+<input
+  id="quantityInput"
+  type="number"
+  min="1"
+  step="1"
+  placeholder="请输入数量">
+
+
+<button
+  id="stockInButton"
+  class="primary"
+  onclick="executeStockIn()">
+  执行入库
+</button>
+
+
+<button
+  class="secondary"
+  onclick="resetAll()">
+  重新开始
+</button>
+
+
+<div
+  id="successMessage"
+  class="success">
+</div>
+
+<div
+  id="errorMessage"
+  class="error">
+</div>
+```
+
+  </div>
+
+  <!-- =========================
+       底部工具
+       ========================= -->
+
+  <div class="bottom-tools">
+
+```
+<button
+  class="small-button"
+  onclick="testConnection()">
+  测试连接
+</button>
+```
+
+  </div>
+
+</div>
 
 <script>
 
@@ -365,9 +548,6 @@
 
   let serial = "";
 
-  // 注意：
-  // 这里不能使用变量名 location，
-  // 因为浏览器本身已经有 window.location。
   let stockLocation = "";
 
 
@@ -395,27 +575,13 @@
     const config = {
 
       /*
-       * 原来：10
-       * 现在：15
-       *
-       * 每秒进行更多次识别尝试，
-       * 提高移动扫码时的响应速度。
+       * 提高扫描检测频率
        */
       fps: 15,
 
 
       /*
-       * 扩大二维码 / 条形码识别区域。
-       *
-       * 原来：
-       * 85% 宽 × 35% 高
-       *
-       * 现在：
-       * 90% 宽 × 55% 高
-       *
-       * 注意：
-       * 这是“识别区域”，
-       * 不是页面摄像头显示高度。
+       * 扩大有效识别区域
        */
       qrbox: function(
         viewfinderWidth,
@@ -1064,4 +1230,3 @@
 
 </body>
 </html>
-```
