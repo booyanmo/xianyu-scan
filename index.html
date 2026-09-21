@@ -42,13 +42,14 @@
 
 
     /* =========================
-       顶部库存信息区域
+       第一板块：当前操作
+       加高，方便查看商品和仓位
        ========================= */
 
     .info-card {
       background: #fff;
       border-radius: 10px;
-      padding: 15px 14px;
+      padding: 18px 14px;
       margin-bottom: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
@@ -57,7 +58,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 18px;
     }
 
     .operation-title {
@@ -68,41 +69,76 @@
     .operation-tag {
       font-size: 12px;
       padding: 4px 10px;
-      border-radius: 14px;
+      border-radius: 12px;
       background: #f0f0f0;
       color: #555;
     }
 
-
-    /* 商品 / 仓位两个信息框 */
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    .info-row {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+      margin-bottom: 12px;
     }
 
-    .info-item {
-      background: #f7f7f7;
-      border-radius: 8px;
-      padding: 10px 11px;
-      min-height: 62px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+    .info-row:last-child {
+      margin-bottom: 0;
     }
 
     .info-label {
-      font-size: 12px;
+      width: 52px;
+      flex-shrink: 0;
+      font-size: 13px;
       color: #888;
-      margin-bottom: 5px;
     }
 
     .info-value {
+      flex: 1;
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 600;
       word-break: break-all;
-      line-height: 1.25;
+    }
+
+
+    /* =========================
+       数量区域
+       放到第一板块后面
+       ========================= */
+
+    .quantity-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .quantity-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quantity-label {
+      width: 64px;
+      flex-shrink: 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    input {
+      flex: 1;
+      width: 100%;
+      padding: 9px 10px;
+      font-size: 17px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      min-width: 0;
+    }
+
+    input:focus {
+      border-color: #888;
     }
 
 
@@ -177,41 +213,16 @@
 
 
     /* =========================
-       数量区域
+       执行按钮
        ========================= */
 
-    .quantity-card {
+    .action-card {
       background: #fff;
       border-radius: 10px;
       padding: 9px 10px;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-
-    .quantity-label {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 3px;
-    }
-
-    input {
-      width: 100%;
-      padding: 9px 10px;
-      font-size: 17px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      margin-top: 2px;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: #888;
-    }
-
-
-    /* =========================
-       按钮
-       ========================= */
 
     button {
       width: 100%;
@@ -239,16 +250,15 @@
 
 
     /* =========================
-       底部小按钮
+       底部测试连接
        ========================= */
 
     .bottom-tools {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 14px;
-      margin-top: 3px;
-      margin-bottom: 3px;
+      margin-top: 2px;
+      margin-bottom: 2px;
     }
 
     .small-button {
@@ -298,7 +308,7 @@
 
 
     /* =========================
-       较矮屏幕
+       较矮手机屏幕
        ========================= */
 
     @media (max-height: 700px) {
@@ -313,17 +323,26 @@
       }
 
       .info-card {
-        padding: 13px 12px;
+        padding: 14px 11px;
         margin-bottom: 6px;
       }
 
       .operation-line {
-        margin-bottom: 10px;
+        margin-bottom: 14px;
       }
 
-      .info-item {
-        min-height: 58px;
-        padding: 9px 10px;
+      .info-row {
+        min-height: 36px;
+        margin-bottom: 9px;
+      }
+
+      .info-value {
+        font-size: 17px;
+      }
+
+      .quantity-card {
+        padding: 8px;
+        margin-bottom: 6px;
       }
 
       .scan-card {
@@ -343,7 +362,7 @@
         margin: 4px 0;
       }
 
-      .quantity-card {
+      .action-card {
         padding: 7px 8px;
       }
 
@@ -369,7 +388,7 @@
   <h1>BYbuyerstore莫莫店</h1>
 
   <!-- =========================
-       当前库存操作
+       第一板块
        ========================= -->
 
   <div class="info-card">
@@ -390,36 +409,58 @@
 </div>
 
 
-<div class="info-grid">
+<div class="info-row">
 
-  <div class="info-item">
+  <div class="info-label">
+    商品
+  </div>
 
-    <div class="info-label">
-      商品序号
-    </div>
+  <div
+    id="serialDisplay"
+    class="info-value">
+    等待扫描
+  </div>
 
-    <div
-      id="serialDisplay"
-      class="info-value">
-      等待扫描
-    </div>
+</div>
+
+
+<div class="info-row">
+
+  <div class="info-label">
+    仓位
+  </div>
+
+  <div
+    id="locationDisplay"
+    class="info-value">
+    等待扫描
+  </div>
+
+</div>
+```
 
   </div>
 
+  <!-- =========================
+       入库数量
+       放在第一板块下面
+       ========================= -->
 
-  <div class="info-item">
+  <div class="quantity-card">
 
-    <div class="info-label">
-      仓存位置
-    </div>
+```
+<div class="quantity-row">
 
-    <div
-      id="locationDisplay"
-      class="info-value">
-      等待扫描
-    </div>
-
+  <div class="quantity-label">
+    入库数量
   </div>
+
+  <input
+    id="quantityInput"
+    type="number"
+    min="1"
+    step="1"
+    placeholder="请输入数量">
 
 </div>
 ```
@@ -484,24 +525,12 @@
   </div>
 
   <!-- =========================
-       数量
+       执行操作
        ========================= -->
 
-  <div class="quantity-card">
+  <div class="action-card">
 
 ```
-<div class="quantity-label">
-  入库数量
-</div>
-
-<input
-  id="quantityInput"
-  type="number"
-  min="1"
-  step="1"
-  placeholder="请输入数量">
-
-
 <button
   id="stockInButton"
   class="primary"
@@ -1068,7 +1097,6 @@
             })
 
           }
-
         );
 
 
