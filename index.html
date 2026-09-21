@@ -58,8 +58,8 @@
     }
 
     /*
-     * 摄像头区域
-     * 固定较矮的高度，避免页面被摄像头撑得太长
+     * 摄像头显示区域
+     * 这里只控制页面上摄像头显示的高度
      */
     #reader {
       width: 100%;
@@ -69,10 +69,6 @@
       border-radius: 8px;
     }
 
-    /*
-     * 让 html5-qrcode 的视频区域
-     * 尽量填满 280px 高度
-     */
     #reader video {
       width: 100% !important;
       height: 260px !important;
@@ -398,8 +394,29 @@
 
     const config = {
 
-      fps: 10,
+      /*
+       * 原来：10
+       * 现在：15
+       *
+       * 每秒进行更多次识别尝试，
+       * 提高移动扫码时的响应速度。
+       */
+      fps: 15,
 
+
+      /*
+       * 扩大二维码 / 条形码识别区域。
+       *
+       * 原来：
+       * 85% 宽 × 35% 高
+       *
+       * 现在：
+       * 90% 宽 × 55% 高
+       *
+       * 注意：
+       * 这是“识别区域”，
+       * 不是页面摄像头显示高度。
+       */
       qrbox: function(
         viewfinderWidth,
         viewfinderHeight
@@ -409,21 +426,22 @@
 
           width: Math.min(
             Math.floor(
-              viewfinderWidth * 0.85
+              viewfinderWidth * 0.90
             ),
-            350
+            400
           ),
 
           height: Math.min(
             Math.floor(
-              viewfinderHeight * 0.35
+              viewfinderHeight * 0.55
             ),
-            150
+            220
           )
 
         };
 
       },
+
 
       formatsToSupport: [
 
