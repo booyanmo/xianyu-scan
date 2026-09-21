@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -154,7 +155,6 @@
 
   <h1>闲鱼库存扫码</h1>
 
-
   <!-- 当前操作 -->
 
   <div class="card">
@@ -255,7 +255,6 @@
       step="1"
       placeholder="请输入数量">
 
-
     <button
       id="stockInButton"
       class="primary"
@@ -263,20 +262,17 @@
       执行入库
     </button>
 
-
     <button
       class="secondary"
       onclick="resetAll()">
       重新开始
     </button>
 
-
     <button
       class="secondary"
       onclick="testConnection()">
       测试连接
     </button>
-
 
     <div
       id="successMessage"
@@ -315,7 +311,10 @@
 
   let serial = "";
 
-  let location = "";
+  // 注意：
+  // 这里不能使用变量名 location，
+  // 因为浏览器本身已经有 window.location。
+  let stockLocation = "";
 
 
   // ==========================================
@@ -331,8 +330,6 @@
 
   // ==========================================
   // 启动摄像头
-  //
-  // 这里保持最简单的启动方式
   // ==========================================
 
   function startScanner() {
@@ -475,7 +472,7 @@
 
 
   // ==========================================
-  // 确认
+  // 确认扫描结果
   // ==========================================
 
   function confirmScan() {
@@ -524,14 +521,14 @@
 
     if (step === "location") {
 
-      location =
+      stockLocation =
         pendingResult;
 
 
       document.getElementById(
         "locationDisplay"
       ).innerText =
-        location;
+        stockLocation;
 
 
       pendingResult = "";
@@ -644,7 +641,7 @@
     }
 
 
-    if (!location) {
+    if (!stockLocation) {
 
       showError(
         "请先扫描并确认仓存位置"
@@ -724,7 +721,7 @@
 
               oldLocation: "",
 
-              newLocation: location,
+              newLocation: stockLocation,
 
               quantity: Number(quantity),
 
@@ -863,7 +860,7 @@
 
     serial = "";
 
-    location = "";
+    stockLocation = "";
 
     pendingResult = "";
 
@@ -991,3 +988,4 @@
 
 </body>
 </html>
+```
