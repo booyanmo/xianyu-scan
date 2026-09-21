@@ -28,8 +28,9 @@
       margin: 0 auto;
     }
 
+
     /* =========================
-       顶部标题
+       店铺标题
        ========================= */
 
     h1 {
@@ -41,13 +42,13 @@
 
 
     /* =========================
-       当前操作信息
+       顶部库存信息区域
        ========================= */
 
     .info-card {
       background: #fff;
       border-radius: 10px;
-      padding: 9px 12px;
+      padding: 15px 14px;
       margin-bottom: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
@@ -56,40 +57,52 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 7px;
+      margin-bottom: 12px;
     }
 
     .operation-title {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
     }
 
     .operation-tag {
       font-size: 12px;
-      padding: 3px 8px;
-      border-radius: 12px;
+      padding: 4px 10px;
+      border-radius: 14px;
       background: #f0f0f0;
       color: #555;
     }
 
-    .info-row {
+
+    /* 商品 / 仓位两个信息框 */
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-item {
+      background: #f7f7f7;
+      border-radius: 8px;
+      padding: 10px 11px;
+      min-height: 62px;
       display: flex;
-      align-items: center;
-      min-height: 24px;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .info-label {
-      width: 48px;
-      flex-shrink: 0;
       font-size: 12px;
       color: #888;
+      margin-bottom: 5px;
     }
 
     .info-value {
-      flex: 1;
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 18px;
+      font-weight: 700;
       word-break: break-all;
+      line-height: 1.25;
     }
 
 
@@ -226,7 +239,7 @@
 
 
     /* =========================
-       底部小按钮区域
+       底部小按钮
        ========================= */
 
     .bottom-tools {
@@ -285,7 +298,7 @@
 
 
     /* =========================
-       iPhone 等较矮屏幕
+       较矮屏幕
        ========================= */
 
     @media (max-height: 700px) {
@@ -300,12 +313,17 @@
       }
 
       .info-card {
-        padding: 7px 10px;
+        padding: 13px 12px;
         margin-bottom: 6px;
       }
 
       .operation-line {
-        margin-bottom: 5px;
+        margin-bottom: 10px;
+      }
+
+      .info-item {
+        min-height: 58px;
+        padding: 9px 10px;
       }
 
       .scan-card {
@@ -351,11 +369,12 @@
   <h1>BYbuyerstore莫莫店</h1>
 
   <!-- =========================
-       当前操作信息
+       当前库存操作
        ========================= -->
 
   <div class="info-card">
 
+```
 <div class="operation-line">
 
   <div class="operation-title">
@@ -371,34 +390,39 @@
 </div>
 
 
-<div class="info-row">
+<div class="info-grid">
 
-  <div class="info-label">
-    商品
+  <div class="info-item">
+
+    <div class="info-label">
+      商品序号
+    </div>
+
+    <div
+      id="serialDisplay"
+      class="info-value">
+      等待扫描
+    </div>
+
   </div>
 
-  <div
-    id="serialDisplay"
-    class="info-value">
-    等待扫描
+
+  <div class="info-item">
+
+    <div class="info-label">
+      仓存位置
+    </div>
+
+    <div
+      id="locationDisplay"
+      class="info-value">
+      等待扫描
+    </div>
+
   </div>
 
 </div>
-
-
-<div class="info-row">
-
-  <div class="info-label">
-    仓位
-  </div>
-
-  <div
-    id="locationDisplay"
-    class="info-value">
-    等待扫描
-  </div>
-
-</div>
+```
 
   </div>
 
@@ -408,6 +432,7 @@
 
   <div class="scan-card">
 
+```
 <div
   id="stepTitle"
   class="step">
@@ -454,6 +479,7 @@
   </button>
 
 </div>
+```
 
   </div>
 
@@ -463,6 +489,7 @@
 
   <div class="quantity-card">
 
+```
 <div class="quantity-label">
   入库数量
 </div>
@@ -499,6 +526,7 @@
   id="errorMessage"
   class="error">
 </div>
+```
 
   </div>
 
@@ -508,11 +536,13 @@
 
   <div class="bottom-tools">
 
+```
 <button
   class="small-button"
   onclick="testConnection()">
   测试连接
 </button>
+```
 
   </div>
 
@@ -566,15 +596,8 @@
 
     const config = {
 
-      /*
-       * 提高扫描检测频率
-       */
       fps: 15,
 
-
-      /*
-       * 扩大有效识别区域
-       */
       qrbox: function(
         viewfinderWidth,
         viewfinderHeight
@@ -599,7 +622,6 @@
         };
 
       },
-
 
       formatsToSupport: [
 
@@ -718,8 +740,6 @@
     }
 
 
-    // 商品确认
-
     if (step === "serial") {
 
       serial =
@@ -750,8 +770,6 @@
 
     }
 
-
-    // 位置确认
 
     if (step === "location") {
 
@@ -1050,6 +1068,7 @@
             })
 
           }
+
         );
 
 
