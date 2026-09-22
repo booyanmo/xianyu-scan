@@ -28,23 +28,12 @@
       margin: 0 auto;
     }
 
-
-    /* =========================
-       店铺标题
-       ========================= */
-
     h1 {
       text-align: center;
       margin: 3px 0 8px;
       font-size: 21px;
       font-weight: 700;
     }
-
-
-    /* =========================
-       第一板块：当前操作
-       加高，方便查看商品和仓位
-       ========================= */
 
     .info-card {
       background: #fff;
@@ -99,12 +88,6 @@
       word-break: break-all;
     }
 
-
-    /* =========================
-       数量区域
-       放到第一板块后面
-       ========================= */
-
     .quantity-card {
       background: #fff;
       border-radius: 10px;
@@ -140,11 +123,6 @@
     input:focus {
       border-color: #888;
     }
-
-
-    /* =========================
-       扫描区域
-       ========================= */
 
     .scan-card {
       background: #fff;
@@ -186,11 +164,6 @@
       font-size: 12px;
     }
 
-
-    /* =========================
-       扫描结果
-       ========================= */
-
     .result-box {
       background: #f7f7f7;
       border-radius: 8px;
@@ -210,11 +183,6 @@
       font-weight: 700;
       word-break: break-all;
     }
-
-
-    /* =========================
-       执行按钮
-       ========================= */
 
     .action-card {
       background: #fff;
@@ -248,11 +216,6 @@
       color: #222;
     }
 
-
-    /* =========================
-       底部测试连接
-       ========================= */
-
     .bottom-tools {
       display: flex;
       justify-content: center;
@@ -274,11 +237,6 @@
       background: #e8e8e8;
       border-radius: 5px;
     }
-
-
-    /* =========================
-       成功 / 错误提示
-       ========================= */
 
     .success {
       background: #e8f7e8;
@@ -305,11 +263,6 @@
     .hidden {
       display: none !important;
     }
-
-
-    /* =========================
-       较矮手机屏幕
-       ========================= */
 
     @media (max-height: 700px) {
 
@@ -381,19 +334,11 @@
 
 <div class="container">
 
-  <!-- =========================
-       店铺标题
-       ========================= -->
-
   <h1>BYbuyerstore莫莫店</h1>
-
-  <!-- =========================
-       第一板块
-       ========================= -->
 
   <div class="info-card">
 
-
+```
 <div class="operation-line">
 
   <div class="operation-title">
@@ -407,7 +352,6 @@
   </div>
 
 </div>
-
 
 <div class="info-row">
 
@@ -423,7 +367,6 @@
 
 </div>
 
-
 <div class="info-row">
 
   <div class="info-label">
@@ -437,18 +380,13 @@
   </div>
 
 </div>
-
+```
 
   </div>
 
-  <!-- =========================
-       入库数量
-       放在第一板块下面
-       ========================= -->
-
   <div class="quantity-card">
 
-
+```
 <div class="quantity-row">
 
   <div class="quantity-label">
@@ -463,35 +401,26 @@
     placeholder="请输入数量">
 
 </div>
-
+```
 
   </div>
 
-  <!-- =========================
-       扫描区域
-       ========================= -->
-
   <div class="scan-card">
 
-
+```
 <div
   id="stepTitle"
   class="step">
   第一步：扫描商品条码
 </div>
 
-
 <div id="reader"></div>
-
 
 <div
   id="scanStatus"
   class="scan-status">
   正在准备摄像头……
 </div>
-
-
-<!-- 扫描结果确认 -->
 
 <div
   id="resultBox"
@@ -520,17 +449,13 @@
   </button>
 
 </div>
-
+```
 
   </div>
 
-  <!-- =========================
-       执行操作
-       ========================= -->
-
   <div class="action-card">
 
-
+```
 <button
   id="stockInButton"
   class="primary"
@@ -538,13 +463,11 @@
   执行入库
 </button>
 
-
 <button
   class="secondary"
   onclick="resetAll()">
   重新开始
 </button>
-
 
 <div
   id="successMessage"
@@ -555,23 +478,19 @@
   id="errorMessage"
   class="error">
 </div>
-
+```
 
   </div>
 
-  <!-- =========================
-       底部工具
-       ========================= -->
-
   <div class="bottom-tools">
 
-
+```
 <button
   class="small-button"
   onclick="testConnection()">
   测试连接
 </button>
-
+```
 
   </div>
 
@@ -585,6 +504,158 @@
 
   const APPS_SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbykJPjh3aCJrypFpdMa_SmKA6fw2hbfZu-K5V1BRk0dZHEL6hPm_X6ICibQPnPUMvF-/exec";
+
+
+  // ==========================================
+  // 扫码提示音
+  // ==========================================
+
+  let audioContext = null;
+
+  function initAudio() {
+
+    if (!audioContext) {
+
+      const AudioContext =
+        window.AudioContext ||
+        window.webkitAudioContext;
+
+      if (!AudioContext) {
+        return;
+      }
+
+      audioContext =
+        new AudioContext();
+
+    }
+
+    if (
+      audioContext.state === "suspended"
+    ) {
+
+      audioContext.resume().catch(
+        function() {}
+      );
+
+    }
+
+  }
+
+
+  function unlockAudio() {
+
+    initAudio();
+
+  }
+
+
+  function playScanBeep() {
+
+    try {
+
+      initAudio();
+
+      if (!audioContext) {
+        return;
+      }
+
+      if (
+        audioContext.state === "suspended"
+      ) {
+
+        audioContext.resume().then(
+          function() {
+            createScanBeep();
+          }
+        ).catch(
+          function() {}
+        );
+
+        return;
+
+      }
+
+      createScanBeep();
+
+    } catch (error) {
+
+      // 浏览器不支持声音时，不影响扫码功能
+
+    }
+
+  }
+
+
+  function createScanBeep() {
+
+    try {
+
+      const oscillator =
+        audioContext.createOscillator();
+
+      const gainNode =
+        audioContext.createGain();
+
+      oscillator.type = "sine";
+
+      oscillator.frequency.setValueAtTime(
+        880,
+        audioContext.currentTime
+      );
+
+      gainNode.gain.setValueAtTime(
+        0.0001,
+        audioContext.currentTime
+      );
+
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.18,
+        audioContext.currentTime + 0.01
+      );
+
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.0001,
+        audioContext.currentTime + 0.12
+      );
+
+      oscillator.connect(gainNode);
+
+      gainNode.connect(
+        audioContext.destination
+      );
+
+      oscillator.start();
+
+      oscillator.stop(
+        audioContext.currentTime + 0.13
+      );
+
+    } catch (error) {
+
+      // 声音失败不影响扫码功能
+
+    }
+
+  }
+
+
+  // iPhone 浏览器通常需要用户先触摸页面，
+  // 这里提前解除音频播放限制。
+  document.addEventListener(
+    "touchstart",
+    unlockAudio,
+    {
+      passive: true
+    }
+  );
+
+  document.addEventListener(
+    "click",
+    unlockAudio,
+    {
+      passive: true
+    }
+  );
 
 
   // ==========================================
@@ -606,11 +677,14 @@
   // 页面加载
   // ==========================================
 
-  window.addEventListener("load", function() {
+  window.addEventListener(
+    "load",
+    function() {
 
-    startScanner();
+      startScanner();
 
-  });
+    }
+  );
 
 
   // ==========================================
@@ -717,6 +791,10 @@
       return;
 
     }
+
+
+    // 扫码成功提示音
+    playScanBeep();
 
 
     pendingResult =
