@@ -55,10 +55,6 @@
       font-weight: 600;
     }
 
-    /* =========================
-       操作类型选择
-       ========================= */
-
     .operation-selector {
       position: relative;
       flex-shrink: 0;
@@ -188,6 +184,15 @@
       border-color: #888;
     }
 
+    /* 数量默认值 1 */
+    #quantityInput.quantity-default {
+      color: #aaa;
+    }
+
+    #quantityInput.quantity-active {
+      color: #222;
+    }
+
     .scan-card {
       background: #fff;
       border-radius: 10px;
@@ -247,10 +252,6 @@
       font-weight: 700;
       word-break: break-all;
     }
-
-    /* =========================
-       手动输入
-       ========================= */
 
     .manual-area {
       margin-top: 6px;
@@ -555,8 +556,6 @@
 
   </div>
 
-  <!-- 手动输入框显示位置 -->
-
   <div id="manualBoxTarget"></div>
 
   <div class="quantity-card">
@@ -575,7 +574,9 @@
     type="number"
     min="1"
     step="1"
-    placeholder="请输入数量">
+    value="1"
+    class="quantity-default"
+    inputmode="numeric">
 
 </div>
 
@@ -626,8 +627,6 @@
   </button>
 
 </div>
-
-<!-- 手动输入按钮保持原来的位置 -->
 
 <div class="manual-area">
 
@@ -686,13 +685,6 @@
 
 </div>
 
-<!--
-  手动输入框本体。
-  默认隐藏。
-  点击“无法扫码？手动输入”后，
-  会移动到上面的 manualBoxTarget。
--->
-
 <div
   id="manualBox"
   class="manual-box hidden">
@@ -746,6 +738,78 @@
   // ==========================================
 
   let currentOperation = "入库";
+
+
+  // ==========================================
+  // 数量输入
+  // ==========================================
+
+  const quantityInput =
+    document.getElementById("quantityInput");
+
+
+  function setQuantityDefault() {
+
+    quantityInput.value = "1";
+
+    quantityInput.classList.remove(
+      "quantity-active"
+    );
+
+    quantityInput.classList.add(
+      "quantity-default"
+    );
+
+  }
+
+
+  function activateQuantityInput() {
+
+    if (
+      quantityInput.classList.contains(
+        "quantity-default"
+      )
+    ) {
+
+      quantityInput.value = "";
+
+      quantityInput.classList.remove(
+        "quantity-default"
+      );
+
+      quantityInput.classList.add(
+        "quantity-active"
+      );
+
+    }
+
+  }
+
+
+  quantityInput.addEventListener(
+    "focus",
+    function() {
+
+      activateQuantityInput();
+
+    }
+  );
+
+
+  quantityInput.addEventListener(
+    "input",
+    function() {
+
+      quantityInput.classList.remove(
+        "quantity-default"
+      );
+
+      quantityInput.classList.add(
+        "quantity-active"
+      );
+
+    }
+  );
 
 
   // ==========================================
@@ -820,19 +884,6 @@
       "operationButton"
     ).classList.remove("open");
 
-
-    /*
-      如果用户在已经扫描了一部分的情况下
-      切换了操作类型，
-      清掉上一种操作的数据，
-      防止出现：
-
-      入库商品 + 移库仓位
-      或
-      移库商品 + 出库仓位
-
-      这种数据混合。
-    */
 
     if (changed) {
 
@@ -915,10 +966,10 @@
   }
 
 
-  /*
-    点击页面其他位置时，
-    自动关闭操作选择菜单。
-  */
+  // ==========================================
+  // 点击页面其他位置时，
+  // 自动关闭操作选择菜单。
+  // ==========================================
 
   document.addEventListener(
     "click",
@@ -1022,8 +1073,6 @@
 
     } catch (error) {
 
-      // 声音失败不影响扫码功能
-
     }
 
   }
@@ -1075,8 +1124,6 @@
 
     } catch (error) {
 
-      // 声音失败不影响扫码功能
-
     }
 
   }
@@ -1106,13 +1153,6 @@
 
   let scanner = null;
 
-  /*
-    serial
-    oldLocation
-    newLocation
-    ready
-  */
-
   let step = "serial";
 
   let pendingResult = "";
@@ -1122,15 +1162,6 @@
   let oldLocation = "";
 
   let newLocation = "";
-
-  /*
-    stockLocation
-    保留这个变量，
-    作为最终提交时的仓位变量。
-    入库：= 新仓位
-    出库：= 出库仓位
-    移库：= 新仓位
-  */
 
   let stockLocation = "";
 
@@ -1150,6 +1181,8 @@
         document.querySelector(
           ".manual-area"
         );
+
+      setQuantityDefault();
 
       updateOperationUI();
 
@@ -1333,10 +1366,6 @@
     }
 
 
-    // ------------------------------------------
-    // 第一步：商品
-    // ------------------------------------------
-
     if (step === "serial") {
 
       serial =
@@ -1377,10 +1406,6 @@
     }
 
 
-    // ------------------------------------------
-    // 移库第二步：原仓位
-    // ------------------------------------------
-
     if (step === "oldLocation") {
 
       oldLocation =
@@ -1413,19 +1438,6 @@
     }
 
 
-    // ------------------------------------------
-    // 普通仓位确认
-    //
-    // 入库：
-    // location = 新仓位
-    //
-    // 出库：
-    // location = 出库仓位
-    //
-    // 移库：
-    // location = 新仓位
-    // ------------------------------------------
-
     if (step === "location") {
 
       newLocation =
@@ -1435,14 +1447,6 @@
       stockLocation =
         newLocation;
 
-
-      /*
-        移库时显示：
-
-        原仓位 → 新仓位
-
-        入库/出库时直接显示仓位。
-      */
 
       if (currentOperation === "移库") {
 
@@ -1711,10 +1715,6 @@
       value;
 
 
-    // ------------------------------------------
-    // 商品
-    // ------------------------------------------
-
     if (step === "serial") {
 
       serial =
@@ -1754,10 +1754,6 @@
     }
 
 
-    // ------------------------------------------
-    // 移库：原仓位
-    // ------------------------------------------
-
     if (step === "oldLocation") {
 
       oldLocation =
@@ -1788,10 +1784,6 @@
 
     }
 
-
-    // ------------------------------------------
-    // 最终仓位
-    // ------------------------------------------
 
     if (step === "location") {
 
@@ -1854,7 +1846,6 @@
         "manualInput"
       );
 
-
     input.blur();
 
   }
@@ -1878,10 +1869,6 @@
       );
 
 
-    // ------------------------------------------
-    // 商品
-    // ------------------------------------------
-
     if (step === "serial") {
 
       title.innerText =
@@ -1894,10 +1881,6 @@
 
     }
 
-
-    // ------------------------------------------
-    // 移库：原仓位
-    // ------------------------------------------
 
     if (
       step === "oldLocation"
@@ -1913,10 +1896,6 @@
 
     }
 
-
-    // ------------------------------------------
-    // 普通仓位
-    // ------------------------------------------
 
     if (
       step === "location" &&
@@ -1943,10 +1922,6 @@
     }
 
 
-    // ------------------------------------------
-    // 移库：新仓位
-    // ------------------------------------------
-
     if (
       step === "location" &&
       currentOperation === "移库"
@@ -1962,10 +1937,6 @@
 
     }
 
-
-    // ------------------------------------------
-    // 完成扫码
-    // ------------------------------------------
 
     if (step === "ready") {
 
@@ -2013,10 +1984,6 @@
     hideMessages();
 
 
-    // ========================================
-    // 基础检查
-    // ========================================
-
     if (!serial) {
 
       showError(
@@ -2028,7 +1995,12 @@
     }
 
 
-    const quantity =
+    /*
+      如果数量框仍然保持默认状态，
+      就把它视为数量 1。
+    */
+
+    let quantity =
       document.getElementById(
         "quantityInput"
       ).value.trim();
@@ -2036,33 +2008,9 @@
 
     if (!quantity) {
 
-      if (currentOperation === "入库") {
+      quantity = "1";
 
-        showError(
-          "请输入入库数量"
-        );
-
-      }
-
-      else if (
-        currentOperation === "移库"
-      ) {
-
-        showError(
-          "请输入移库数量"
-        );
-
-      }
-
-      else {
-
-        showError(
-          "请输入出库数量"
-        );
-
-      }
-
-      return;
+      setQuantityDefault();
 
     }
 
@@ -2105,10 +2053,6 @@
     }
 
 
-    // ========================================
-    // 入库
-    // ========================================
-
     if (currentOperation === "入库") {
 
       if (!newLocation) {
@@ -2123,10 +2067,6 @@
 
     }
 
-
-    // ========================================
-    // 移库
-    // ========================================
 
     if (currentOperation === "移库") {
 
@@ -2166,10 +2106,6 @@
 
     }
 
-
-    // ========================================
-    // 出库
-    // ========================================
 
     if (currentOperation === "出库") {
 
@@ -2219,10 +2155,6 @@
     }
 
 
-    // ========================================
-    // 发送到 Apps Script
-    // ========================================
-
     try {
 
       const response =
@@ -2252,13 +2184,7 @@
                   : "",
 
               newLocation:
-                currentOperation === "入库"
-                  ? newLocation
-                  : (
-                      currentOperation === "移库"
-                        ? newLocation
-                        : newLocation
-                    ),
+                newLocation,
 
               quantity:
                 Number(quantity),
@@ -2275,10 +2201,6 @@
       const result =
         await response.json();
 
-
-      // ========================================
-      // 成功
-      // ========================================
 
       if (result.success) {
 
@@ -2316,19 +2238,7 @@
 
         }
 
-
-        /*
-          成功以后保持按钮禁用，
-          防止用户连续点击导致重复库存操作。
-          需要下一笔操作时点击“重新开始”。
-        */
-
       }
-
-
-      // ========================================
-      // 失败
-      // ========================================
 
       else {
 
@@ -2373,10 +2283,6 @@
 
     }
 
-
-    // ========================================
-    // 通信失败
-    // ========================================
 
     catch (error) {
 
@@ -2450,10 +2356,7 @@
       "等待扫描";
 
 
-    document.getElementById(
-      "quantityInput"
-    ).value =
-      "";
+    setQuantityDefault();
 
 
     document.getElementById(
@@ -2590,10 +2493,7 @@
       "等待扫描";
 
 
-    document.getElementById(
-      "quantityInput"
-    ).value =
-      "";
+    setQuantityDefault();
 
 
     document.getElementById(
