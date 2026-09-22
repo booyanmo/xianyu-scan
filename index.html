@@ -564,7 +564,9 @@
 
 <div class="quantity-row">
 
-  <div class="quantity-label">
+  <div
+    id="quantityLabel"
+    class="quantity-label">
     入库数量
   </div>
 
@@ -746,6 +748,10 @@
   let currentOperation = "入库";
 
 
+  // ==========================================
+  // 操作类型菜单
+  // ==========================================
+
   function toggleOperationMenu() {
 
     const menu =
@@ -758,33 +764,30 @@
         "operationButton"
       );
 
-
     menu.classList.toggle("hidden");
 
-    button.classList.toggle(
-      "open"
-    );
+    button.classList.toggle("open");
 
   }
 
 
   function selectOperation(operation) {
 
+    const changed =
+      currentOperation !== operation;
+
     currentOperation =
       operation;
-
 
     document.getElementById(
       "operationTag"
     ).innerText =
       operation;
 
-
     const options =
       document.querySelectorAll(
         ".operation-option"
       );
-
 
     options.forEach(
       function(option) {
@@ -809,11 +812,9 @@
       }
     );
 
-
     document.getElementById(
       "operationMenu"
     ).classList.add("hidden");
-
 
     document.getElementById(
       "operationButton"
@@ -821,21 +822,43 @@
 
 
     /*
-      目前只有“入库”已经接通后端。
-      移库、出库先不执行，
-      避免误把它们当成入库处理。
+      如果用户在已经扫描了一部分的情况下
+      切换了操作类型，
+      清掉上一种操作的数据，
+      防止出现：
+
+      入库商品 + 移库仓位
+      或
+      移库商品 + 出库仓位
+
+      这种数据混合。
     */
+
+    if (changed) {
+
+      resetOperationData();
+
+    }
 
     updateOperationUI();
 
   }
 
 
+  // ==========================================
+  // 根据操作类型更新界面
+  // ==========================================
+
   function updateOperationUI() {
 
     const button =
       document.getElementById(
         "stockInButton"
+      );
+
+    const quantityLabel =
+      document.getElementById(
+        "quantityLabel"
       );
 
 
@@ -845,6 +868,11 @@
 
       button.innerText =
         "执行入库";
+
+      quantityLabel.innerText =
+        "入库数量";
+
+      updateStatus();
 
       return;
 
@@ -856,7 +884,12 @@
       button.disabled = false;
 
       button.innerText =
-        "移库功能即将开放";
+        "执行移库";
+
+      quantityLabel.innerText =
+        "移库数量";
+
+      updateStatus();
 
       return;
 
@@ -868,7 +901,12 @@
       button.disabled = false;
 
       button.innerText =
-        "出库功能即将开放";
+        "执行出库";
+
+      quantityLabel.innerText =
+        "出库数量";
+
+      updateStatus();
 
       return;
 
@@ -891,7 +929,6 @@
           ".operation-selector"
         );
 
-
       if (
         selector &&
         !selector.contains(event.target)
@@ -900,7 +937,6 @@
         document.getElementById(
           "operationMenu"
         ).classList.add("hidden");
-
 
         document.getElementById(
           "operationButton"
@@ -917,6 +953,7 @@
   // ==========================================
 
   let audioContext = null;
+
 
   function initAudio() {
 
@@ -1053,6 +1090,7 @@
     }
   );
 
+
   document.addEventListener(
     "click",
     unlockAudio,
@@ -1068,11 +1106,31 @@
 
   let scanner = null;
 
+  /*
+    serial
+    oldLocation
+    newLocation
+    ready
+  */
+
   let step = "serial";
 
   let pendingResult = "";
 
   let serial = "";
+
+  let oldLocation = "";
+
+  let newLocation = "";
+
+  /*
+    stockLocation
+    保留这个变量，
+    作为最终提交时的仓位变量。
+    入库：= 新仓位
+    出库：= 出库仓位
+    移库：= 新仓位
+  */
 
   let stockLocation = "";
 
@@ -1092,6 +1150,8 @@
         document.querySelector(
           ".manual-area"
         );
+
+      updateOperationUI();
 
       startScanner();
 
@@ -1197,6 +1257,7 @@
 
     if (
       step !== "serial" &&
+      step !== "oldLocation" &&
       step !== "location"
     ) {
 
@@ -1233,7 +1294,18 @@
       ).innerText =
         "确认商品序号";
 
-    } else {
+    }
+
+    else if (step === "oldLocation") {
+
+      document.getElementById(
+        "confirmButton"
+      ).innerText =
+        "确认原仓位";
+
+    }
+
+    else {
 
       document.getElementById(
         "confirmButton"
@@ -1261,6 +1333,10 @@
     }
 
 
+    // ------------------------------------------
+    // 第一步：商品
+    // ------------------------------------------
+
     if (step === "serial") {
 
       serial =
@@ -1281,6 +1357,50 @@
       ).classList.add("hidden");
 
 
+      if (currentOperation === "移库") {
+
+        step = "oldLocation";
+
+      } else {
+
+        step = "location";
+
+      }
+
+
+      updateManualInputText();
+
+      updateStatus();
+
+      return;
+
+    }
+
+
+    // ------------------------------------------
+    // 移库第二步：原仓位
+    // ------------------------------------------
+
+    if (step === "oldLocation") {
+
+      oldLocation =
+        pendingResult;
+
+
+      document.getElementById(
+        "locationDisplay"
+      ).innerText =
+        oldLocation;
+
+
+      pendingResult = "";
+
+
+      document.getElementById(
+        "resultBox"
+      ).classList.add("hidden");
+
+
       step = "location";
 
 
@@ -1288,22 +1408,59 @@
 
       updateStatus();
 
-
       return;
 
     }
 
 
+    // ------------------------------------------
+    // 普通仓位确认
+    //
+    // 入库：
+    // location = 新仓位
+    //
+    // 出库：
+    // location = 出库仓位
+    //
+    // 移库：
+    // location = 新仓位
+    // ------------------------------------------
+
     if (step === "location") {
 
-      stockLocation =
+      newLocation =
         pendingResult;
 
 
-      document.getElementById(
-        "locationDisplay"
-      ).innerText =
-        stockLocation;
+      stockLocation =
+        newLocation;
+
+
+      /*
+        移库时显示：
+
+        原仓位 → 新仓位
+
+        入库/出库时直接显示仓位。
+      */
+
+      if (currentOperation === "移库") {
+
+        document.getElementById(
+          "locationDisplay"
+        ).innerText =
+          oldLocation +
+          " → " +
+          newLocation;
+
+      } else {
+
+        document.getElementById(
+          "locationDisplay"
+        ).innerText =
+          newLocation;
+
+      }
 
 
       pendingResult = "";
@@ -1320,7 +1477,6 @@
       updateManualInputText();
 
       updateStatus();
-
 
       return;
 
@@ -1356,6 +1512,7 @@
 
     if (
       step !== "serial" &&
+      step !== "oldLocation" &&
       step !== "location"
     ) {
 
@@ -1368,6 +1525,7 @@
       document.getElementById(
         "manualBox"
       );
+
 
     const target =
       document.getElementById(
@@ -1458,6 +1616,7 @@
         "manualTitle"
       );
 
+
     const input =
       document.getElementById(
         "manualInput"
@@ -1474,13 +1633,39 @@
 
     }
 
-    else if (step === "location") {
+    else if (
+      step === "oldLocation"
+    ) {
 
       title.innerText =
-        "手动输入仓存位置";
+        "手动输入原仓存位置";
 
       input.placeholder =
-        "请输入仓存位置";
+        "请输入原仓存位置";
+
+    }
+
+    else if (
+      step === "location"
+    ) {
+
+      if (currentOperation === "移库") {
+
+        title.innerText =
+          "手动输入新仓存位置";
+
+        input.placeholder =
+          "请输入新仓存位置";
+
+      } else {
+
+        title.innerText =
+          "手动输入仓存位置";
+
+        input.placeholder =
+          "请输入仓存位置";
+
+      }
 
     }
 
@@ -1508,6 +1693,7 @@
         "manualInput"
       );
 
+
     const value =
       input.value.trim();
 
@@ -1521,8 +1707,13 @@
     }
 
 
-    pendingResult = value;
+    pendingResult =
+      value;
 
+
+    // ------------------------------------------
+    // 商品
+    // ------------------------------------------
 
     if (step === "serial") {
 
@@ -1539,6 +1730,49 @@
       pendingResult = "";
 
 
+      if (currentOperation === "移库") {
+
+        step = "oldLocation";
+
+      } else {
+
+        step = "location";
+
+      }
+
+
+      hideManualInput();
+
+      hideKeyboard();
+
+      updateManualInputText();
+
+      updateStatus();
+
+      return;
+
+    }
+
+
+    // ------------------------------------------
+    // 移库：原仓位
+    // ------------------------------------------
+
+    if (step === "oldLocation") {
+
+      oldLocation =
+        pendingResult;
+
+
+      document.getElementById(
+        "locationDisplay"
+      ).innerText =
+        oldLocation;
+
+
+      pendingResult = "";
+
+
       step = "location";
 
 
@@ -1550,22 +1784,42 @@
 
       updateStatus();
 
-
       return;
 
     }
 
 
+    // ------------------------------------------
+    // 最终仓位
+    // ------------------------------------------
+
     if (step === "location") {
 
-      stockLocation =
+      newLocation =
         pendingResult;
 
 
-      document.getElementById(
-        "locationDisplay"
-      ).innerText =
-        stockLocation;
+      stockLocation =
+        newLocation;
+
+
+      if (currentOperation === "移库") {
+
+        document.getElementById(
+          "locationDisplay"
+        ).innerText =
+          oldLocation +
+          " → " +
+          newLocation;
+
+      } else {
+
+        document.getElementById(
+          "locationDisplay"
+        ).innerText =
+          newLocation;
+
+      }
 
 
       pendingResult = "";
@@ -1581,7 +1835,6 @@
       updateManualInputText();
 
       updateStatus();
-
 
       return;
 
@@ -1618,11 +1871,16 @@
         "stepTitle"
       );
 
+
     const status =
       document.getElementById(
         "scanStatus"
       );
 
+
+    // ------------------------------------------
+    // 商品
+    // ------------------------------------------
 
     if (step === "serial") {
 
@@ -1632,25 +1890,114 @@
       status.innerText =
         "请扫描商品条码";
 
+      return;
+
     }
 
-    else if (step === "location") {
+
+    // ------------------------------------------
+    // 移库：原仓位
+    // ------------------------------------------
+
+    if (
+      step === "oldLocation"
+    ) {
+
+      title.innerText =
+        "第二步：扫描原仓位";
+
+      status.innerText =
+        "商品序号已确认，请扫描原仓位条码";
+
+      return;
+
+    }
+
+
+    // ------------------------------------------
+    // 普通仓位
+    // ------------------------------------------
+
+    if (
+      step === "location" &&
+      currentOperation !== "移库"
+    ) {
 
       title.innerText =
         "第二步：扫描仓存位置";
 
-      status.innerText =
-        "商品序号已确认，请扫描仓存位置条码";
+      if (currentOperation === "出库") {
+
+        status.innerText =
+          "商品序号已确认，请扫描出库仓位条码";
+
+      } else {
+
+        status.innerText =
+          "商品序号已确认，请扫描仓存位置条码";
+
+      }
+
+      return;
 
     }
 
-    else {
+
+    // ------------------------------------------
+    // 移库：新仓位
+    // ------------------------------------------
+
+    if (
+      step === "location" &&
+      currentOperation === "移库"
+    ) {
+
+      title.innerText =
+        "第三步：扫描新仓位";
+
+      status.innerText =
+        "原仓位已确认，请扫描新的仓位条码";
+
+      return;
+
+    }
+
+
+    // ------------------------------------------
+    // 完成扫码
+    // ------------------------------------------
+
+    if (step === "ready") {
 
       title.innerText =
         "扫码完成";
 
-      status.innerText =
-        "商品和仓存位置已确认，请输入数量";
+      if (currentOperation === "入库") {
+
+        status.innerText =
+          "商品和仓存位置已确认，请输入入库数量";
+
+      }
+
+      else if (
+        currentOperation === "移库"
+      ) {
+
+        status.innerText =
+          "商品、原仓位和新仓位已确认，请输入移库数量";
+
+      }
+
+      else if (
+        currentOperation === "出库"
+      ) {
+
+        status.innerText =
+          "商品和出库仓位已确认，请输入出库数量";
+
+      }
+
+      return;
 
     }
 
@@ -1658,7 +2005,7 @@
 
 
   // ==========================================
-  // 执行入库
+  // 执行库存操作
   // ==========================================
 
   async function executeStockIn() {
@@ -1666,38 +2013,14 @@
     hideMessages();
 
 
-    /*
-      目前只有入库已经接通。
-      防止选择移库/出库后误执行入库。
-    */
-
-    if (currentOperation !== "入库") {
-
-      showError(
-        currentOperation +
-        "功能目前正在开发中，请先选择“入库”"
-      );
-
-      return;
-
-    }
-
+    // ========================================
+    // 基础检查
+    // ========================================
 
     if (!serial) {
 
       showError(
         "请先扫描并确认商品序号"
-      );
-
-      return;
-
-    }
-
-
-    if (!stockLocation) {
-
-      showError(
-        "请先扫描并确认仓存位置"
       );
 
       return;
@@ -1713,9 +2036,31 @@
 
     if (!quantity) {
 
-      showError(
-        "请输入入库数量"
-      );
+      if (currentOperation === "入库") {
+
+        showError(
+          "请输入入库数量"
+        );
+
+      }
+
+      else if (
+        currentOperation === "移库"
+      ) {
+
+        showError(
+          "请输入移库数量"
+        );
+
+      }
+
+      else {
+
+        showError(
+          "请输入出库数量"
+        );
+
+      }
 
       return;
 
@@ -1729,11 +2074,114 @@
       )
     ) {
 
-      showError(
-        "入库数量必须是大于 0 的整数"
-      );
+      if (currentOperation === "入库") {
+
+        showError(
+          "入库数量必须是大于 0 的整数"
+        );
+
+      }
+
+      else if (
+        currentOperation === "移库"
+      ) {
+
+        showError(
+          "移库数量必须是大于 0 的整数"
+        );
+
+      }
+
+      else {
+
+        showError(
+          "出库数量必须是大于 0 的整数"
+        );
+
+      }
 
       return;
+
+    }
+
+
+    // ========================================
+    // 入库
+    // ========================================
+
+    if (currentOperation === "入库") {
+
+      if (!newLocation) {
+
+        showError(
+          "请先扫描并确认仓存位置"
+        );
+
+        return;
+
+      }
+
+    }
+
+
+    // ========================================
+    // 移库
+    // ========================================
+
+    if (currentOperation === "移库") {
+
+      if (!oldLocation) {
+
+        showError(
+          "请先扫描并确认原仓位"
+        );
+
+        return;
+
+      }
+
+
+      if (!newLocation) {
+
+        showError(
+          "请先扫描并确认新仓位"
+        );
+
+        return;
+
+      }
+
+
+      if (
+        oldLocation === newLocation
+      ) {
+
+        showError(
+          "原仓位和新仓位不能相同"
+        );
+
+        return;
+
+      }
+
+    }
+
+
+    // ========================================
+    // 出库
+    // ========================================
+
+    if (currentOperation === "出库") {
+
+      if (!newLocation) {
+
+        showError(
+          "请先扫描并确认出库仓位"
+        );
+
+        return;
+
+      }
 
     }
 
@@ -1746,9 +2194,34 @@
 
     button.disabled = true;
 
-    button.innerText =
-      "正在执行入库……";
 
+    if (currentOperation === "入库") {
+
+      button.innerText =
+        "正在执行入库……";
+
+    }
+
+    else if (
+      currentOperation === "移库"
+    ) {
+
+      button.innerText =
+        "正在执行移库……";
+
+    }
+
+    else {
+
+      button.innerText =
+        "正在执行出库……";
+
+    }
+
+
+    // ========================================
+    // 发送到 Apps Script
+    // ========================================
 
     try {
 
@@ -1770,15 +2243,28 @@
 
               action: "inventory",
 
-              serial: serial,
+              serial:
+                serial,
 
-              oldLocation: "",
+              oldLocation:
+                currentOperation === "移库"
+                  ? oldLocation
+                  : "",
 
-              newLocation: stockLocation,
+              newLocation:
+                currentOperation === "入库"
+                  ? newLocation
+                  : (
+                      currentOperation === "移库"
+                        ? newLocation
+                        : newLocation
+                    ),
 
-              quantity: Number(quantity),
+              quantity:
+                Number(quantity),
 
-              operationType: "入库"
+              operationType:
+                currentOperation
 
             })
 
@@ -1790,34 +2276,107 @@
         await response.json();
 
 
+      // ========================================
+      // 成功
+      // ========================================
+
       if (result.success) {
 
         showSuccess(
           result.message ||
-          "入库成功"
+          (
+            currentOperation +
+            "成功"
+          )
         );
 
 
-        button.innerText =
-          "入库成功";
+        if (
+          currentOperation === "入库"
+        ) {
+
+          button.innerText =
+            "入库成功";
+
+        }
+
+        else if (
+          currentOperation === "移库"
+        ) {
+
+          button.innerText =
+            "移库成功";
+
+        }
+
+        else {
+
+          button.innerText =
+            "出库成功";
+
+        }
 
 
-      } else {
+        /*
+          成功以后保持按钮禁用，
+          防止用户连续点击导致重复库存操作。
+          需要下一笔操作时点击“重新开始”。
+        */
+
+      }
+
+
+      // ========================================
+      // 失败
+      // ========================================
+
+      else {
 
         showError(
           result.message ||
-          "入库失败"
+          (
+            currentOperation +
+            "失败"
+          )
         );
 
 
         button.disabled = false;
 
-        button.innerText =
-          "执行入库";
+
+        if (
+          currentOperation === "入库"
+        ) {
+
+          button.innerText =
+            "执行入库";
+
+        }
+
+        else if (
+          currentOperation === "移库"
+        ) {
+
+          button.innerText =
+            "执行移库";
+
+        }
+
+        else {
+
+          button.innerText =
+            "执行出库";
+
+        }
 
       }
 
     }
+
+
+    // ========================================
+    // 通信失败
+    // ========================================
 
     catch (error) {
 
@@ -1829,10 +2388,103 @@
 
       button.disabled = false;
 
-      button.innerText =
-        "执行入库";
+
+      if (
+        currentOperation === "入库"
+      ) {
+
+        button.innerText =
+          "执行入库";
+
+      }
+
+      else if (
+        currentOperation === "移库"
+      ) {
+
+        button.innerText =
+          "执行移库";
+
+      }
+
+      else {
+
+        button.innerText =
+          "执行出库";
+
+      }
 
     }
+
+  }
+
+
+  // ==========================================
+  // 切换操作时清空当前操作数据
+  // ==========================================
+
+  function resetOperationData() {
+
+    serial = "";
+
+    oldLocation = "";
+
+    newLocation = "";
+
+    stockLocation = "";
+
+    pendingResult = "";
+
+    step = "serial";
+
+
+    document.getElementById(
+      "serialDisplay"
+    ).innerText =
+      "等待扫描";
+
+
+    document.getElementById(
+      "locationDisplay"
+    ).innerText =
+      "等待扫描";
+
+
+    document.getElementById(
+      "quantityInput"
+    ).value =
+      "";
+
+
+    document.getElementById(
+      "resultBox"
+    ).classList.add("hidden");
+
+
+    document.getElementById(
+      "manualInput"
+    ).value =
+      "";
+
+
+    hideManualInput();
+
+
+    const button =
+      document.getElementById(
+        "stockInButton"
+      );
+
+
+    button.disabled = false;
+
+
+    hideMessages();
+
+
+    updateManualInputText();
+
+    updateStatus();
 
   }
 
@@ -1912,6 +2564,10 @@
   function resetAll() {
 
     serial = "";
+
+    oldLocation = "";
+
+    newLocation = "";
 
     stockLocation = "";
 
