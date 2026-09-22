@@ -184,6 +184,73 @@
       word-break: break-all;
     }
 
+    /* =========================
+       手动输入
+       ========================= */
+
+    .manual-area {
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .manual-toggle {
+      width: auto;
+      display: inline-block;
+      padding: 5px 9px;
+      margin: 0;
+      background: transparent;
+      color: #777;
+      font-size: 12px;
+    }
+
+    .manual-box {
+      background: #f7f7f7;
+      border-radius: 8px;
+      padding: 9px;
+      margin-top: 6px;
+    }
+
+    .manual-title {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .manual-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .manual-input {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 9px;
+      font-size: 17px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .manual-confirm {
+      width: auto;
+      flex-shrink: 0;
+      padding: 8px 12px;
+      margin: 0;
+      background: #222;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .manual-cancel {
+      width: auto;
+      padding: 4px 8px;
+      margin: 5px 0 0;
+      background: transparent;
+      color: #888;
+      font-size: 11px;
+    }
+
     .action-card {
       background: #fff;
       border-radius: 10px;
@@ -449,6 +516,56 @@
   </button>
 
 </div>
+
+<!-- 手动输入区域 -->
+
+<div class="manual-area">
+
+  <button
+    id="manualToggleButton"
+    class="manual-toggle"
+    onclick="showManualInput()">
+    无法扫码？手动输入
+  </button>
+
+  <div
+    id="manualBox"
+    class="manual-box hidden">
+
+    <div
+      id="manualTitle"
+      class="manual-title">
+      手动输入商品序号
+    </div>
+
+    <div class="manual-row">
+
+      <input
+        id="manualInput"
+        class="manual-input"
+        type="text"
+        autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+        placeholder="请输入商品序号">
+
+      <button
+        class="manual-confirm"
+        onclick="confirmManualInput()">
+        确认
+      </button>
+
+    </div>
+
+    <button
+      class="manual-cancel"
+      onclick="hideManualInput()">
+      取消手动输入
+    </button>
+
+  </div>
+
+</div>
 ```
 
   </div>
@@ -579,7 +696,7 @@
 
     } catch (error) {
 
-      // 浏览器不支持声音时，不影响扫码功能
+      // 声音失败不影响扫码功能
 
     }
 
@@ -639,8 +756,6 @@
   }
 
 
-  // iPhone 浏览器通常需要用户先触摸页面，
-  // 这里提前解除音频播放限制。
   document.addEventListener(
     "touchstart",
     unlockAudio,
@@ -793,7 +908,6 @@
     }
 
 
-    // 扫码成功提示音
     playScanBeep();
 
 
@@ -810,6 +924,11 @@
     document.getElementById(
       "resultBox"
     ).classList.remove("hidden");
+
+
+    // 如果之前打开了手动输入，
+    // 扫码成功后自动关闭
+    hideManualInput();
 
 
     if (step === "serial") {
@@ -870,6 +989,8 @@
       step = "location";
 
 
+      updateManualInputText();
+
       updateStatus();
 
 
@@ -901,6 +1022,8 @@
       step = "ready";
 
 
+      updateManualInputText();
+
       updateStatus();
 
 
@@ -926,6 +1049,236 @@
 
 
     updateStatus();
+
+  }
+
+
+  // ==========================================
+  // 显示手动输入
+  // ==========================================
+
+  function showManualInput() {
+
+    if (
+      step !== "serial" &&
+      step !== "location"
+    ) {
+
+      return;
+
+    }
+
+
+    document.getElementById(
+      "manualBox"
+    ).classList.remove("hidden");
+
+
+    document.getElementById(
+      "manualToggleButton"
+    ).classList.add("hidden");
+
+
+    updateManualInputText();
+
+
+    const input =
+      document.getElementById(
+        "manualInput"
+      );
+
+
+    input.value = "";
+
+
+    // 稍微延迟一下，
+    // 确保 iPhone 键盘正常弹出
+    setTimeout(
+      function() {
+
+        input.focus();
+
+      },
+      100
+    );
+
+  }
+
+
+  // ==========================================
+  // 隐藏手动输入
+  // ==========================================
+
+  function hideManualInput() {
+
+    document.getElementById(
+      "manualBox"
+    ).classList.add("hidden");
+
+
+    document.getElementById(
+      "manualToggleButton"
+    ).classList.remove("hidden");
+
+  }
+
+
+  // ==========================================
+  // 更新手动输入文字
+  // ==========================================
+
+  function updateManualInputText() {
+
+    const title =
+      document.getElementById(
+        "manualTitle"
+      );
+
+    const input =
+      document.getElementById(
+        "manualInput"
+      );
+
+
+    if (step === "serial") {
+
+      title.innerText =
+        "手动输入商品序号";
+
+      input.placeholder =
+        "请输入商品序号";
+
+    }
+
+    else if (step === "location") {
+
+      title.innerText =
+        "手动输入仓存位置";
+
+      input.placeholder =
+        "请输入仓存位置";
+
+    }
+
+    else {
+
+      title.innerText =
+        "";
+
+      input.placeholder =
+        "";
+
+    }
+
+  }
+
+
+  // ==========================================
+  // 确认手动输入
+  // ==========================================
+
+  function confirmManualInput() {
+
+    const input =
+      document.getElementById(
+        "manualInput"
+      );
+
+    const value =
+      input.value.trim();
+
+
+    if (!value) {
+
+      input.focus();
+
+      return;
+
+    }
+
+
+    pendingResult = value;
+
+
+    if (step === "serial") {
+
+      serial =
+        pendingResult;
+
+
+      document.getElementById(
+        "serialDisplay"
+      ).innerText =
+        serial;
+
+
+      pendingResult = "";
+
+
+      step = "location";
+
+
+      hideManualInput();
+
+      hideKeyboard();
+
+      updateManualInputText();
+
+      updateStatus();
+
+
+      return;
+
+    }
+
+
+    if (step === "location") {
+
+      stockLocation =
+        pendingResult;
+
+
+      document.getElementById(
+        "locationDisplay"
+      ).innerText =
+        stockLocation;
+
+
+      pendingResult = "";
+
+
+      step = "ready";
+
+
+      hideManualInput();
+
+      hideKeyboard();
+
+      updateManualInputText();
+
+      updateStatus();
+
+
+      return;
+
+    }
+
+  }
+
+
+  // ==========================================
+  // 收起 iPhone 键盘
+  // ==========================================
+
+  function hideKeyboard() {
+
+    const input =
+      document.getElementById(
+        "manualInput"
+      );
+
+
+    input.blur();
 
   }
 
@@ -1249,6 +1602,15 @@
     ).classList.add("hidden");
 
 
+    document.getElementById(
+      "manualInput"
+    ).value =
+      "";
+
+
+    hideManualInput();
+
+
     const button =
       document.getElementById(
         "stockInButton"
@@ -1263,6 +1625,8 @@
 
     hideMessages();
 
+
+    updateManualInputText();
 
     updateStatus();
 
