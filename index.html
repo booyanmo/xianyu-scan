@@ -55,12 +55,58 @@
       font-weight: 600;
     }
 
+    /* =========================
+       操作类型选择
+       ========================= */
+
+    .operation-selector {
+      position: relative;
+    }
+
     .operation-tag {
+      border: none;
       font-size: 12px;
       padding: 4px 10px;
       border-radius: 12px;
       background: #f0f0f0;
       color: #555;
+      cursor: pointer;
+      width: auto;
+      margin: 0;
+      line-height: normal;
+    }
+
+    .operation-tag:active {
+      background: #e5e5e5;
+    }
+
+    .operation-menu {
+      position: absolute;
+      top: calc(100% + 5px);
+      right: 0;
+      min-width: 82px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 4px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+    }
+
+    .operation-option {
+      display: block;
+      width: 100%;
+      padding: 7px 10px;
+      margin: 0;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #333;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .operation-option:active {
+      background: #f0f0f0;
     }
 
     .info-row {
@@ -412,10 +458,39 @@
     库存操作
   </div>
 
-  <div
-    id="operationTag"
-    class="operation-tag">
-    入库
+  <div class="operation-selector">
+
+    <button
+      id="operationTag"
+      class="operation-tag"
+      onclick="toggleOperationMenu()">
+      入库 ▾
+    </button>
+
+    <div
+      id="operationMenu"
+      class="operation-menu hidden">
+
+      <button
+        class="operation-option"
+        onclick="selectOperation('入库')">
+        入库
+      </button>
+
+      <button
+        class="operation-option"
+        onclick="selectOperation('移库')">
+        移库
+      </button>
+
+      <button
+        class="operation-option"
+        onclick="selectOperation('出库')">
+        出库
+      </button>
+
+    </div>
+
   </div>
 
 </div>
@@ -450,10 +525,6 @@
 
 
   </div>
-
-  <!-- 手动输入框显示位置 -->
-
-  <!-- 正常状态下为空，不占页面空间 -->
 
   <div id="manualBoxTarget"></div>
 
@@ -523,8 +594,6 @@
 
 </div>
 
-<!-- 手动输入按钮保持原来的位置 -->
-
 <div class="manual-area">
 
   <button
@@ -570,24 +639,17 @@
 
   <div class="bottom-tools">
 
-```
+
 <button
   class="small-button"
   onclick="testConnection()">
   测试连接
 </button>
-```
+
 
   </div>
 
 </div>
-
-<!--
-  手动输入框本体。
-  默认隐藏。
-  点击“无法扫码？手动输入”后，
-  会移动到上面的 manualBoxTarget。
--->
 
 <div
   id="manualBox"
@@ -635,6 +697,113 @@
 
   const APPS_SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbykJPjh3aCJrypFpdMa_SmKA6fw2hbfZu-K5V1BRk0dZHEL6hPm_X6ICibQPnPUMvF-/exec";
+
+
+  // ==========================================
+  // 当前库存操作类型
+  // ==========================================
+
+  let operationType = "入库";
+
+
+  function toggleOperationMenu() {
+
+    const menu =
+      document.getElementById(
+        "operationMenu"
+      );
+
+    menu.classList.toggle("hidden");
+
+  }
+
+
+  function selectOperation(type) {
+
+    operationType = type;
+
+
+    const tag =
+      document.getElementById(
+        "operationTag"
+      );
+
+    tag.innerText =
+      type + " ▾";
+
+
+    document.getElementById(
+      "operationMenu"
+    ).classList.add("hidden");
+
+
+    /*
+      当前阶段：
+      选择移库/出库只改变操作类型，
+      暂时不改变已经测试成功的入库执行逻辑。
+    */
+
+    if (type === "入库") {
+
+      document.getElementById(
+        "quantityInput"
+      ).previousElementSibling.innerText =
+        "入库数量";
+
+    }
+
+    else if (type === "移库") {
+
+      document.getElementById(
+        "quantityInput"
+      ).previousElementSibling.innerText =
+        "操作数量";
+
+    }
+
+    else if (type === "出库") {
+
+      document.getElementById(
+        "quantityInput"
+      ).previousElementSibling.innerText =
+        "出库数量";
+
+    }
+
+
+    updateStatus();
+
+  }
+
+
+  // 点击页面其他位置时关闭操作菜单
+
+  document.addEventListener(
+    "click",
+    function(event) {
+
+      const selector =
+        document.querySelector(
+          ".operation-selector"
+        );
+
+      const menu =
+        document.getElementById(
+          "operationMenu"
+        );
+
+
+      if (
+        selector &&
+        !selector.contains(event.target)
+      ) {
+
+        menu.classList.add("hidden");
+
+      }
+
+    }
+  );
 
 
   // ==========================================
@@ -710,8 +879,6 @@
 
     } catch (error) {
 
-      // 声音失败不影响扫码功能
-
     }
 
   }
@@ -762,8 +929,6 @@
       );
 
     } catch (error) {
-
-      // 声音失败不影响扫码功能
 
     }
 
@@ -948,9 +1113,6 @@
     ).classList.remove("hidden");
 
 
-    // 如果之前打开了手动输入，
-    // 扫码成功后自动关闭
-
     hideManualInput();
 
 
@@ -1103,19 +1265,6 @@
       );
 
 
-    /*
-      把手动输入框移动到：
-
-      库存操作
-          ↓
-      手动输入框
-          ↓
-      入库数量
-
-      这样 iPhone 键盘弹起时，
-      商品和仓位仍然位于输入框上方。
-    */
-
     target.appendChild(
       manualBox
     );
@@ -1142,9 +1291,6 @@
 
     input.value = "";
 
-
-    // 稍微延迟一下，
-    // 确保 iPhone 键盘正常弹出
 
     setTimeout(
       function() {
@@ -1174,12 +1320,6 @@
       "hidden"
     );
 
-
-    /*
-      隐藏后把输入框放回摄像头板块，
-      但它仍然保持 hidden，
-      所以不会改变原来的页面布局。
-    */
 
     if (manualBoxOriginalParent) {
 
@@ -1374,33 +1514,111 @@
       );
 
 
-    if (step === "serial") {
+    if (operationType === "入库") {
 
-      title.innerText =
-        "第一步：扫描商品条码";
+      if (step === "serial") {
 
-      status.innerText =
-        "请扫描商品条码";
+        title.innerText =
+          "第一步：扫描商品条码";
+
+        status.innerText =
+          "请扫描商品条码";
+
+      }
+
+      else if (step === "location") {
+
+        title.innerText =
+          "第二步：扫描仓存位置";
+
+        status.innerText =
+          "商品序号已确认，请扫描仓存位置条码";
+
+      }
+
+      else {
+
+        title.innerText =
+          "扫码完成";
+
+        status.innerText =
+          "商品和仓存位置已确认，请输入数量";
+
+      }
+
+      return;
 
     }
 
-    else if (step === "location") {
 
-      title.innerText =
-        "第二步：扫描仓存位置";
+    if (operationType === "移库") {
 
-      status.innerText =
-        "商品序号已确认，请扫描仓存位置条码";
+      if (step === "serial") {
+
+        title.innerText =
+          "第一步：扫描商品条码";
+
+        status.innerText =
+          "请扫描需要移库的商品";
+
+      }
+
+      else if (step === "location") {
+
+        title.innerText =
+          "第二步：扫描原仓存位置";
+
+        status.innerText =
+          "商品序号已确认，请扫描原仓存位置";
+
+      }
+
+      else {
+
+        title.innerText =
+          "扫码完成";
+
+        status.innerText =
+          "移库操作的扫描流程待设置";
+
+      }
+
+      return;
 
     }
 
-    else {
 
-      title.innerText =
-        "扫码完成";
+    if (operationType === "出库") {
 
-      status.innerText =
-        "商品和仓存位置已确认，请输入数量";
+      if (step === "serial") {
+
+        title.innerText =
+          "第一步：扫描商品条码";
+
+        status.innerText =
+          "请扫描需要出库的商品";
+
+      }
+
+      else if (step === "location") {
+
+        title.innerText =
+          "第二步：扫描仓存位置";
+
+        status.innerText =
+          "商品序号已确认，请扫描出库仓存位置";
+
+      }
+
+      else {
+
+        title.innerText =
+          "扫码完成";
+
+        status.innerText =
+          "出库操作的扫描流程待设置";
+
+      }
 
     }
 
@@ -1414,6 +1632,24 @@
   async function executeStockIn() {
 
     hideMessages();
+
+
+    /*
+      目前只有“入库”执行功能正式启用。
+      移库、出库下一阶段再接入。
+    */
+
+    if (operationType !== "入库") {
+
+      showError(
+        "当前选择的是“" +
+        operationType +
+        "”，该操作暂未启用"
+      );
+
+      return;
+
+    }
 
 
     if (!serial) {
@@ -1652,6 +1888,19 @@
 
     step = "serial";
 
+    operationType = "入库";
+
+
+    document.getElementById(
+      "operationTag"
+    ).innerText =
+      "入库 ▾";
+
+
+    document.getElementById(
+      "operationMenu"
+    ).classList.add("hidden");
+
 
     document.getElementById(
       "serialDisplay"
@@ -1669,6 +1918,12 @@
       "quantityInput"
     ).value =
       "";
+
+
+    document.getElementById(
+      "quantityInput"
+    ).previousElementSibling.innerText =
+      "入库数量";
 
 
     document.getElementById(
