@@ -61,52 +61,70 @@
 
     .operation-selector {
       position: relative;
+      flex-shrink: 0;
     }
 
-    .operation-tag {
-      border: none;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      background: #f0f0f0;
-      color: #555;
-      cursor: pointer;
+    .operation-button {
       width: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 7px 12px;
       margin: 0;
-      line-height: normal;
+      border-radius: 16px;
+      background: #222;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
     }
 
-    .operation-tag:active {
-      background: #e5e5e5;
+    .operation-arrow {
+      font-size: 11px;
+      opacity: 0.85;
+      transition: transform 0.15s ease;
+    }
+
+    .operation-button.open .operation-arrow {
+      transform: rotate(180deg);
     }
 
     .operation-menu {
       position: absolute;
-      top: calc(100% + 5px);
+      top: calc(100% + 6px);
       right: 0;
-      min-width: 82px;
+      min-width: 110px;
+      padding: 5px;
       background: #fff;
-      border-radius: 8px;
-      padding: 4px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.16);
       z-index: 1000;
     }
 
     .operation-option {
-      display: block;
       width: 100%;
-      padding: 7px 10px;
+      padding: 9px 12px;
       margin: 0;
-      border: none;
-      border-radius: 6px;
       background: transparent;
       color: #333;
-      font-size: 13px;
       text-align: center;
+      font-size: 14px;
+      border-radius: 7px;
     }
 
-    .operation-option:active {
-      background: #f0f0f0;
+    .operation-option:hover {
+      background: #f2f2f2;
+    }
+
+    .operation-option.selected {
+      background: #222;
+      color: #fff;
+    }
+
+    .operation-menu.hidden {
+      display: none !important;
     }
 
     .info-row {
@@ -461,10 +479,18 @@
   <div class="operation-selector">
 
     <button
-      id="operationTag"
-      class="operation-tag"
+      id="operationButton"
+      class="operation-button"
       onclick="toggleOperationMenu()">
-      入库 ▾
+
+      <span id="operationTag">
+        入库
+      </span>
+
+      <span class="operation-arrow">
+        ▼
+      </span>
+
     </button>
 
     <div
@@ -472,19 +498,22 @@
       class="operation-menu hidden">
 
       <button
-        class="operation-option"
+        class="operation-option selected"
+        data-operation="入库"
         onclick="selectOperation('入库')">
         入库
       </button>
 
       <button
         class="operation-option"
+        data-operation="移库"
         onclick="selectOperation('移库')">
         移库
       </button>
 
       <button
         class="operation-option"
+        data-operation="出库"
         onclick="selectOperation('出库')">
         出库
       </button>
@@ -525,6 +554,8 @@
 
 
   </div>
+
+  <!-- 手动输入框显示位置 -->
 
   <div id="manualBoxTarget"></div>
 
@@ -594,6 +625,8 @@
 
 </div>
 
+<!-- 手动输入按钮保持原来的位置 -->
+
 <div class="manual-area">
 
   <button
@@ -639,17 +672,24 @@
 
   <div class="bottom-tools">
 
-
+```
 <button
   class="small-button"
   onclick="testConnection()">
   测试连接
 </button>
-
+```
 
   </div>
 
 </div>
+
+<!--
+  手动输入框本体。
+  默认隐藏。
+  点击“无法扫码？手动输入”后，
+  会移动到上面的 manualBoxTarget。
+-->
 
 <div
   id="manualBox"
@@ -703,7 +743,7 @@
   // 当前库存操作类型
   // ==========================================
 
-  let operationType = "入库";
+  let currentOperation = "入库";
 
 
   function toggleOperationMenu() {
@@ -713,23 +753,61 @@
         "operationMenu"
       );
 
+    const button =
+      document.getElementById(
+        "operationButton"
+      );
+
+
     menu.classList.toggle("hidden");
+
+    button.classList.toggle(
+      "open"
+    );
 
   }
 
 
-  function selectOperation(type) {
+  function selectOperation(operation) {
 
-    operationType = type;
+    currentOperation =
+      operation;
 
 
-    const tag =
-      document.getElementById(
-        "operationTag"
+    document.getElementById(
+      "operationTag"
+    ).innerText =
+      operation;
+
+
+    const options =
+      document.querySelectorAll(
+        ".operation-option"
       );
 
-    tag.innerText =
-      type + " ▾";
+
+    options.forEach(
+      function(option) {
+
+        if (
+          option.dataset.operation ===
+          operation
+        ) {
+
+          option.classList.add(
+            "selected"
+          );
+
+        } else {
+
+          option.classList.remove(
+            "selected"
+          );
+
+        }
+
+      }
+    );
 
 
     document.getElementById(
@@ -737,46 +815,72 @@
     ).classList.add("hidden");
 
 
+    document.getElementById(
+      "operationButton"
+    ).classList.remove("open");
+
+
     /*
-      当前阶段：
-      选择移库/出库只改变操作类型，
-      暂时不改变已经测试成功的入库执行逻辑。
+      目前只有“入库”已经接通后端。
+      移库、出库先不执行，
+      避免误把它们当成入库处理。
     */
 
-    if (type === "入库") {
-
-      document.getElementById(
-        "quantityInput"
-      ).previousElementSibling.innerText =
-        "入库数量";
-
-    }
-
-    else if (type === "移库") {
-
-      document.getElementById(
-        "quantityInput"
-      ).previousElementSibling.innerText =
-        "操作数量";
-
-    }
-
-    else if (type === "出库") {
-
-      document.getElementById(
-        "quantityInput"
-      ).previousElementSibling.innerText =
-        "出库数量";
-
-    }
-
-
-    updateStatus();
+    updateOperationUI();
 
   }
 
 
-  // 点击页面其他位置时关闭操作菜单
+  function updateOperationUI() {
+
+    const button =
+      document.getElementById(
+        "stockInButton"
+      );
+
+
+    if (currentOperation === "入库") {
+
+      button.disabled = false;
+
+      button.innerText =
+        "执行入库";
+
+      return;
+
+    }
+
+
+    if (currentOperation === "移库") {
+
+      button.disabled = false;
+
+      button.innerText =
+        "移库功能即将开放";
+
+      return;
+
+    }
+
+
+    if (currentOperation === "出库") {
+
+      button.disabled = false;
+
+      button.innerText =
+        "出库功能即将开放";
+
+      return;
+
+    }
+
+  }
+
+
+  /*
+    点击页面其他位置时，
+    自动关闭操作选择菜单。
+  */
 
   document.addEventListener(
     "click",
@@ -787,18 +891,20 @@
           ".operation-selector"
         );
 
-      const menu =
-        document.getElementById(
-          "operationMenu"
-        );
-
 
       if (
         selector &&
         !selector.contains(event.target)
       ) {
 
-        menu.classList.add("hidden");
+        document.getElementById(
+          "operationMenu"
+        ).classList.add("hidden");
+
+
+        document.getElementById(
+          "operationButton"
+        ).classList.remove("open");
 
       }
 
@@ -879,6 +985,8 @@
 
     } catch (error) {
 
+      // 声音失败不影响扫码功能
+
     }
 
   }
@@ -929,6 +1037,8 @@
       );
 
     } catch (error) {
+
+      // 声音失败不影响扫码功能
 
     }
 
@@ -1514,111 +1624,33 @@
       );
 
 
-    if (operationType === "入库") {
+    if (step === "serial") {
 
-      if (step === "serial") {
+      title.innerText =
+        "第一步：扫描商品条码";
 
-        title.innerText =
-          "第一步：扫描商品条码";
-
-        status.innerText =
-          "请扫描商品条码";
-
-      }
-
-      else if (step === "location") {
-
-        title.innerText =
-          "第二步：扫描仓存位置";
-
-        status.innerText =
-          "商品序号已确认，请扫描仓存位置条码";
-
-      }
-
-      else {
-
-        title.innerText =
-          "扫码完成";
-
-        status.innerText =
-          "商品和仓存位置已确认，请输入数量";
-
-      }
-
-      return;
+      status.innerText =
+        "请扫描商品条码";
 
     }
 
+    else if (step === "location") {
 
-    if (operationType === "移库") {
+      title.innerText =
+        "第二步：扫描仓存位置";
 
-      if (step === "serial") {
-
-        title.innerText =
-          "第一步：扫描商品条码";
-
-        status.innerText =
-          "请扫描需要移库的商品";
-
-      }
-
-      else if (step === "location") {
-
-        title.innerText =
-          "第二步：扫描原仓存位置";
-
-        status.innerText =
-          "商品序号已确认，请扫描原仓存位置";
-
-      }
-
-      else {
-
-        title.innerText =
-          "扫码完成";
-
-        status.innerText =
-          "移库操作的扫描流程待设置";
-
-      }
-
-      return;
+      status.innerText =
+        "商品序号已确认，请扫描仓存位置条码";
 
     }
 
+    else {
 
-    if (operationType === "出库") {
+      title.innerText =
+        "扫码完成";
 
-      if (step === "serial") {
-
-        title.innerText =
-          "第一步：扫描商品条码";
-
-        status.innerText =
-          "请扫描需要出库的商品";
-
-      }
-
-      else if (step === "location") {
-
-        title.innerText =
-          "第二步：扫描仓存位置";
-
-        status.innerText =
-          "商品序号已确认，请扫描出库仓存位置";
-
-      }
-
-      else {
-
-        title.innerText =
-          "扫码完成";
-
-        status.innerText =
-          "出库操作的扫描流程待设置";
-
-      }
+      status.innerText =
+        "商品和仓存位置已确认，请输入数量";
 
     }
 
@@ -1635,16 +1667,15 @@
 
 
     /*
-      目前只有“入库”执行功能正式启用。
-      移库、出库下一阶段再接入。
+      目前只有入库已经接通。
+      防止选择移库/出库后误执行入库。
     */
 
-    if (operationType !== "入库") {
+    if (currentOperation !== "入库") {
 
       showError(
-        "当前选择的是“" +
-        operationType +
-        "”，该操作暂未启用"
+        currentOperation +
+        "功能目前正在开发中，请先选择“入库”"
       );
 
       return;
@@ -1888,18 +1919,7 @@
 
     step = "serial";
 
-    operationType = "入库";
-
-
-    document.getElementById(
-      "operationTag"
-    ).innerText =
-      "入库 ▾";
-
-
-    document.getElementById(
-      "operationMenu"
-    ).classList.add("hidden");
+    currentOperation = "入库";
 
 
     document.getElementById(
@@ -1921,12 +1941,6 @@
 
 
     document.getElementById(
-      "quantityInput"
-    ).previousElementSibling.innerText =
-      "入库数量";
-
-
-    document.getElementById(
       "resultBox"
     ).classList.add("hidden");
 
@@ -1938,6 +1952,48 @@
 
 
     hideManualInput();
+
+
+    document.getElementById(
+      "operationTag"
+    ).innerText =
+      "入库";
+
+
+    document.querySelectorAll(
+      ".operation-option"
+    ).forEach(
+      function(option) {
+
+        if (
+          option.dataset.operation ===
+          "入库"
+        ) {
+
+          option.classList.add(
+            "selected"
+          );
+
+        } else {
+
+          option.classList.remove(
+            "selected"
+          );
+
+        }
+
+      }
+    );
+
+
+    document.getElementById(
+      "operationMenu"
+    ).classList.add("hidden");
+
+
+    document.getElementById(
+      "operationButton"
+    ).classList.remove("open");
 
 
     const button =
