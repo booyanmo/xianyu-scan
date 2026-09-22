@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <title>莫莫闲鱼铺</title>
+
+  <link rel="manifest" href="./manifest.json">
+
+  <meta name="theme-color" content="#f5f5f5">
+
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="default"
+  >
+
+  <meta
+    name="apple-mobile-web-app-title"
+    content="莫莫闲鱼铺"
+  >
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    body {
+      padding:
+        calc(env(safe-area-inset-top) + 20px)
+        16px
+        calc(env(safe-area-inset-bottom) + 24px);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      padding: 18px 0 28px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    .section-title {
+      margin: 0 0 12px 4px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .menu-button {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      padding: 18px 18px;
+      text-align: left;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .menu-button:active {
+      transform: scale(0.985);
+      background: #fafafa;
+    }
+
+    .menu-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .menu-name {
+      font-size: 19px;
+      font-weight: 650;
+    }
+
+    .menu-arrow {
+      font-size: 22px;
+      color: #999;
+    }
+
+    .menu-description {
+      margin-top: 7px;
+      font-size: 13px;
+      color: #999;
+    }
+
+    .coming {
+      opacity: 0.65;
+      cursor: default;
+    }
+
+    .footer {
+      margin-top: 34px;
+      text-align: center;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    @media (max-height: 700px) {
+      .header {
+        padding-top: 8px;
+        padding-bottom: 20px;
+      }
+
+      .title {
+        font-size: 27px;
+      }
+
+      .menu-button {
+        padding: 15px 16px;
+      }
+
+      .menu {
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <div class="header">
+      <h1 class="title">莫莫闲鱼铺</h1>
+      <div class="subtitle">库存与商品管理</div>
+    </div>
+
+    <div class="section-title">功能</div>
+
+    <div class="menu">
+
+      <button
+        class="menu-button"
+        onclick="openInventory()"
+      >
+        <div class="menu-main">
+          <div class="menu-name">库存操作</div>
+          <div class="menu-arrow">›</div>
+        </div>
+
+        <div class="menu-description">
+          入库 · 移库 · 出库
+        </div>
+      </button>
+
+      <button
+        class="menu-button coming"
+        onclick="showComingSoon()"
+      >
+        <div class="menu-main">
+          <div class="menu-name">产品录入</div>
+          <div class="menu-arrow">›</div>
+        </div>
+
+        <div class="menu-description">
+          产品资料录入 · 即将开放
+        </div>
+      </button>
+
+    </div>
+
+    <div class="footer">
+      BYbuyerstore · 莫莫闲鱼铺
+    </div>
+
+  </div>
+
+  <script>
+    function openInventory() {
+      window.location.href = "./inventory.html";
+    }
+
+    function showComingSoon() {
+      alert("产品录入功能正在开发中");
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function() {
+        navigator.serviceWorker.register("./sw.js")
+          .catch(function(error) {
+            console.log(
+              "Service Worker 注册失败：",
+              error
+            );
+          });
+      });
+    }
+  </script>
+
+</body>
+</html>
