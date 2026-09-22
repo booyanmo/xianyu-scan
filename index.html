@@ -7,6 +7,11 @@
 
   <title>BYbuyerstore莫莫店</title>
 
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#222222">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="莫莫闲鱼铺">
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
   <style>
@@ -2650,5 +2655,16 @@
 
 </script>
 
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker.register("./sw.js")
+        .catch(function(error) {
+          console.log("Service Worker 注册失败：", error);
+        });
+    });
+  }
+</script>
+  
 </body>
 </html>
