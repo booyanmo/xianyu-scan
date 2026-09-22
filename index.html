@@ -2,288 +2,398 @@
 
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>BYbuyerstore莫莫店</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <title>BYbuyerstore莫莫店</title>
 
-<style>
-  * {
-    box-sizing: border-box;
-  }
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-  body {
-    margin: 0;
-    padding: 12px;
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
-      "Helvetica Neue", Arial, sans-serif;
-    background: #f5f5f5;
-    color: #222;
-  }
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-  .container {
-    max-width: 520px;
-    margin: 0 auto;
-  }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 8px;
+      background: #f5f5f5;
+      color: #222;
+    }
 
-  h1 {
-    text-align: center;
-    font-size: 24px;
-    margin: 4px 0 12px;
-  }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
 
-  .info-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 18px 14px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
+    h1 {
+      text-align: center;
+      margin: 3px 0 8px;
+      font-size: 21px;
+      font-weight: 700;
+    }
 
-  .operation-line {
-    margin-bottom: 18px;
-  }
+    .info-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 18px 14px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
 
-  .operation-select {
-    width: 100%;
-    height: 40px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 0 10px;
-    font-size: 16px;
-    background: #fff;
-  }
+    .operation-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
 
-  .info-row {
-    display: flex;
-    align-items: center;
-    min-height: 40px;
-    margin-bottom: 12px;
-  }
+    .operation-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
 
-  .info-row:last-child {
-    margin-bottom: 0;
-  }
+    .operation-tag {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: #f0f0f0;
+      color: #555;
+    }
 
-  .info-label {
-    width: 90px;
-    flex-shrink: 0;
-    color: #666;
-    font-size: 15px;
-  }
+    .info-row {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+      margin-bottom: 12px;
+    }
 
-  .info-value {
-    flex: 1;
-    font-size: 18px;
-    font-weight: 500;
-    word-break: break-all;
-  }
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
 
-  .quantity-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
+    .info-label {
+      width: 52px;
+      flex-shrink: 0;
+      font-size: 13px;
+      color: #888;
+    }
 
-  .quantity-title {
-    color: #666;
-    font-size: 15px;
-    margin-bottom: 7px;
-  }
+    .info-value {
+      flex: 1;
+      font-size: 18px;
+      font-weight: 600;
+      word-break: break-all;
+    }
 
-  .quantity-input {
-    width: 100%;
-    height: 44px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 0 12px;
-    font-size: 20px;
-    text-align: center;
-    outline: none;
-  }
+    .quantity-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
 
-  .quantity-input:focus {
-    border-color: #888;
-  }
+    .quantity-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-  .scan-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
+    .quantity-label {
+      width: 64px;
+      flex-shrink: 0;
+      font-size: 13px;
+      color: #666;
+    }
 
-  #reader {
-    width: 100%;
-    height: 260px;
-    overflow: hidden;
-    border-radius: 10px;
-    background: #000;
-  }
+    input {
+      flex: 1;
+      width: 100%;
+      padding: 9px 10px;
+      font-size: 17px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      min-width: 0;
+    }
 
-  #reader video {
-    width: 100% !important;
-    height: 260px !important;
-    object-fit: cover !important;
-  }
+    input:focus {
+      border-color: #888;
+    }
 
-  .scan-status {
-    text-align: center;
-    font-size: 15px;
-    color: #666;
-    margin: 8px 0 4px;
-    min-height: 20px;
-  }
+    .scan-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
 
-  .result-box {
-    text-align: center;
-    font-size: 18px;
-    font-weight: 600;
-    min-height: 26px;
-    margin: 4px 0;
-  }
+    .step {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
 
-  .button-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  button {
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-
-  .confirm-button {
-    flex: 1;
-    height: 42px;
-    background: #222;
-    color: #fff;
-  }
-
-  .rescan-button {
-    flex: 1;
-    height: 42px;
-    background: #eee;
-    color: #222;
-  }
-
-  .execute-button {
-    width: 100%;
-    height: 48px;
-    background: #222;
-    color: #fff;
-    font-size: 17px;
-    margin-bottom: 8px;
-  }
-
-  .reset-button {
-    width: 100%;
-    height: 40px;
-    background: #eee;
-    color: #333;
-    margin-bottom: 8px;
-  }
-
-  .test-button {
-    display: block;
-    margin: 2px auto 0;
-    padding: 4px 9px;
-    height: 26px;
-    font-size: 12px;
-    background: #eee;
-    color: #777;
-    border-radius: 6px;
-  }
-
-  /* ==============================
-     手动输入区域
-     默认完全隐藏
-     ============================== */
-
-  .manual-area {
-    display: none;
-    margin-bottom: 10px;
-  }
-
-  .manual-area.show {
-    display: block;
-  }
-
-  .manual-box {
-    background: #fff;
-    border-radius: 12px;
-    padding: 12px 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  }
-
-  .manual-title {
-    color: #666;
-    font-size: 15px;
-    margin-bottom: 7px;
-  }
-
-  .manual-row {
-    display: flex;
-    gap: 8px;
-  }
-
-  .manual-input {
-    flex: 1;
-    height: 44px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 0 12px;
-    font-size: 18px;
-    outline: none;
-  }
-
-  .manual-input:focus {
-    border-color: #888;
-  }
-
-  .manual-confirm {
-    width: 82px;
-    height: 44px;
-    background: #222;
-    color: #fff;
-  }
-
-  .manual-cancel {
-    width: 64px;
-    height: 44px;
-    background: #eee;
-    color: #333;
-  }
-
-  .manual-toggle-area {
-    text-align: center;
-    margin-top: 8px;
-  }
-
-  .manual-toggle {
-    background: transparent;
-    color: #777;
-    font-size: 13px;
-    padding: 3px 6px;
-  }
-
-  @media (max-height: 700px) {
     #reader {
-      height: 240px;
+      width: 100%;
+      height: 260px;
+      margin-top: 4px;
+      overflow: hidden;
+      border-radius: 8px;
     }
 
     #reader video {
-      height: 240px !important;
+      width: 100% !important;
+      height: 260px !important;
+      object-fit: cover !important;
+      border-radius: 8px;
     }
-  }
-</style>
+
+    #reader__dashboard {
+      margin-top: 3px !important;
+    }
+
+    .scan-status {
+      text-align: center;
+      margin: 5px 0;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .result-box {
+      background: #f7f7f7;
+      border-radius: 8px;
+      padding: 8px;
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .result-label {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 2px;
+    }
+
+    .result-value {
+      font-size: 23px;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    /* =========================
+       手动输入
+       ========================= */
+
+    .manual-area {
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    .manual-toggle {
+      width: auto;
+      display: inline-block;
+      padding: 5px 9px;
+      margin: 0;
+      background: transparent;
+      color: #777;
+      font-size: 12px;
+    }
+
+    .manual-box {
+      background: #f7f7f7;
+      border-radius: 8px;
+      padding: 9px;
+      margin-top: 6px;
+    }
+
+    .manual-title {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .manual-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .manual-input {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 9px;
+      font-size: 17px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .manual-confirm {
+      width: auto;
+      flex-shrink: 0;
+      padding: 8px 12px;
+      margin: 0;
+      background: #222;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .manual-cancel {
+      width: auto;
+      padding: 4px 8px;
+      margin: 5px 0 0;
+      background: transparent;
+      color: #888;
+      font-size: 11px;
+    }
+
+    .action-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 9px 10px;
+      margin-bottom: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    button {
+      width: 100%;
+      padding: 9px;
+      margin-top: 5px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+    }
+
+    .primary {
+      background: #222;
+      color: #fff;
+    }
+
+    .secondary {
+      background: #e8e8e8;
+      color: #222;
+    }
+
+    .bottom-tools {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+
+    .small-button {
+      width: auto;
+      padding: 4px 8px;
+      margin: 0;
+      background: transparent;
+      color: #888;
+      font-size: 11px;
+    }
+
+    .small-button:active {
+      background: #e8e8e8;
+      border-radius: 5px;
+    }
+
+    .success {
+      background: #e8f7e8;
+      color: #176b17;
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 6px;
+      display: none;
+      word-break: break-all;
+      font-size: 13px;
+    }
+
+    .error {
+      background: #fdeaea;
+      color: #a00000;
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 6px;
+      display: none;
+      word-break: break-all;
+      font-size: 13px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-height: 700px) {
+
+      body {
+        padding: 6px;
+      }
+
+      h1 {
+        margin: 2px 0 6px;
+        font-size: 20px;
+      }
+
+      .info-card {
+        padding: 14px 11px;
+        margin-bottom: 6px;
+      }
+
+      .operation-line {
+        margin-bottom: 14px;
+      }
+
+      .info-row {
+        min-height: 36px;
+        margin-bottom: 9px;
+      }
+
+      .info-value {
+        font-size: 17px;
+      }
+
+      .quantity-card {
+        padding: 8px;
+        margin-bottom: 6px;
+      }
+
+      .scan-card {
+        padding: 8px;
+        margin-bottom: 6px;
+      }
+
+      #reader {
+        height: 240px;
+      }
+
+      #reader video {
+        height: 240px !important;
+      }
+
+      .scan-status {
+        margin: 4px 0;
+      }
+
+      .action-card {
+        padding: 7px 8px;
+      }
+
+      button {
+        padding: 8px;
+        margin-top: 4px;
+      }
+
+    }
+
+  </style>
 
 </head>
 
@@ -293,1041 +403,1309 @@
 
   <h1>BYbuyerstore莫莫店</h1>
 
-  <!-- 第一板块 -->
-
   <div class="info-card">
 
 
 <div class="operation-line">
-  <select id="operationType" class="operation-select">
-    <option value="入库">入库</option>
-    <option value="移库">移库</option>
-    <option value="出库">出库</option>
-  </select>
+
+  <div class="operation-title">
+    库存操作
+  </div>
+
+  <div
+    id="operationTag"
+    class="operation-tag">
+    入库
+  </div>
+
 </div>
 
 <div class="info-row">
-  <div class="info-label">商品序号</div>
-  <div class="info-value" id="serialDisplay">-</div>
+
+  <div class="info-label">
+    商品
+  </div>
+
+  <div
+    id="serialDisplay"
+    class="info-value">
+    等待扫描
+  </div>
+
 </div>
 
 <div class="info-row">
-  <div class="info-label">仓存位置</div>
-  <div class="info-value" id="locationDisplay">-</div>
-</div>
 
-<div class="info-row">
-  <div class="info-label">目前库存</div>
-  <div class="info-value" id="stockDisplay">-</div>
-</div>
-
-
+  <div class="info-label">
+    仓位
   </div>
 
-  <!--
-    手动输入区域
-    注意：
-    1. 这里位于第一板块和“入库数量”之间
-    2. 默认 display:none
-    3. 点击“无法扫码？手动输入”后才显示
-  -->
-
-  <div id="manualArea" class="manual-area">
-
-
-<div class="manual-box">
-
-  <div class="manual-title" id="manualTitle">
-    手动输入
-  </div>
-
-  <div class="manual-row">
-
-    <input
-      id="manualInput"
-      class="manual-input"
-      type="text"
-      autocomplete="off"
-      autocorrect="off"
-      autocapitalize="off"
-      spellcheck="false"
-    >
-
-    <button
-      id="manualConfirmButton"
-      class="manual-confirm"
-      onclick="confirmManualInput()"
-    >
-      确认
-    </button>
-
-    <button
-      class="manual-cancel"
-      onclick="hideManualInput()"
-    >
-      取消
-    </button>
-
+  <div
+    id="locationDisplay"
+    class="info-value">
+    等待扫描
   </div>
 
 </div>
 
 
   </div>
-
-  <!-- 入库数量 -->
 
   <div class="quantity-card">
 
 
-<div class="quantity-title">
-  入库数量
-</div>
+<div class="quantity-row">
 
-<input
-  id="quantity"
-  class="quantity-input"
-  type="number"
-  min="1"
-  inputmode="numeric"
-  placeholder="请输入数量"
->
+  <div class="quantity-label">
+    入库数量
+  </div>
+
+  <input
+    id="quantityInput"
+    type="number"
+    min="1"
+    step="1"
+    placeholder="请输入数量">
+
+</div>
 
 
   </div>
 
-  <!-- 扫码区域 -->
-
   <div class="scan-card">
 
 
-<div id="reader"></div>
-
-<div id="scanStatus" class="scan-status">
-  正在准备摄像头...
+<div
+  id="stepTitle"
+  class="step">
+  第一步：扫描商品条码
 </div>
 
-<div id="resultBox" class="result-box"></div>
+<div id="reader"></div>
 
-<div class="button-row">
+<div
+  id="scanStatus"
+  class="scan-status">
+  正在准备摄像头……
+</div>
+
+<div
+  id="resultBox"
+  class="result-box hidden">
+
+  <div class="result-label">
+    扫描结果
+  </div>
+
+  <div
+    id="resultValue"
+    class="result-value">
+  </div>
 
   <button
-    id="confirmScanButton"
-    class="confirm-button"
-    onclick="confirmScan()"
-    style="display:none;"
-  >
+    id="confirmButton"
+    class="primary"
+    onclick="confirmScan()">
     确认
   </button>
 
   <button
-    id="rescanButton"
-    class="rescan-button"
-    onclick="rescan()"
-    style="display:none;"
-  >
+    class="secondary"
+    onclick="retryScan()">
     重新扫描
   </button>
 
 </div>
 
-<!-- 手动输入入口 -->
-<div class="manual-toggle-area">
+<!-- 手动输入区域 -->
+
+<div class="manual-area">
+
   <button
     id="manualToggleButton"
     class="manual-toggle"
-    onclick="showManualInput()"
-  >
+    onclick="showManualInput()">
     无法扫码？手动输入
   </button>
+
+  <div
+    id="manualBox"
+    class="manual-box hidden">
+
+    <div
+      id="manualTitle"
+      class="manual-title">
+      手动输入商品序号
+    </div>
+
+    <div class="manual-row">
+
+      <input
+        id="manualInput"
+        class="manual-input"
+        type="text"
+        autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+        placeholder="请输入商品序号">
+
+      <button
+        class="manual-confirm"
+        onclick="confirmManualInput()">
+        确认
+      </button>
+
+    </div>
+
+    <button
+      class="manual-cancel"
+      onclick="hideManualInput()">
+      取消手动输入
+    </button>
+
+  </div>
+
 </div>
 
 
   </div>
 
-<button
-class="execute-button"
-onclick="executeInventory()"
+  <div class="action-card">
 
->
-
-
-执行入库
-
-
-  </button>
 
 <button
-class="reset-button"
-onclick="resetAll()"
-
->
-
-
-重新开始
-
-
-  </button>
+  id="stockInButton"
+  class="primary"
+  onclick="executeStockIn()">
+  执行入库
+</button>
 
 <button
-class="test-button"
-onclick="testConnection()"
+  class="secondary"
+  onclick="resetAll()">
+  重新开始
+</button>
 
->
+<div
+  id="successMessage"
+  class="success">
+</div>
 
-```
-测试连接
-```
+<div
+  id="errorMessage"
+  class="error">
+</div>
 
-  </button>
+
+  </div>
+
+  <div class="bottom-tools">
+
+
+<button
+  class="small-button"
+  onclick="testConnection()">
+  测试连接
+</button>
+
+
+  </div>
 
 </div>
 
 <script>
 
-const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbykJPjh3aCJrypFpdMa_SmKA6fw2hbfZu-K5V1BRk0dZHEL6hPm_X6ICibQPnPUMvF-/exec";
+  // ==========================================
+  // Apps Script
+  // ==========================================
 
-let scanner = null;
-
-let scanStep = "product";
-
-let serial = "";
-let stockLocation = "";
-
-let pendingScanValue = "";
-
-let audioContext = null;
+  const APPS_SCRIPT_URL =
+    "https://script.google.com/macros/s/AKfycbykJPjh3aCJrypFpdMa_SmKA6fw2hbfZu-K5V1BRk0dZHEL6hPm_X6ICibQPnPUMvF-/exec";
 
 
-/* ==============================
-   声音
-   ============================== */
+  // ==========================================
+  // 扫码提示音
+  // ==========================================
 
-function initAudio() {
+  let audioContext = null;
 
-  if (!audioContext) {
+  function initAudio() {
 
-    try {
+    if (!audioContext) {
+
+      const AudioContext =
+        window.AudioContext ||
+        window.webkitAudioContext;
+
+      if (!AudioContext) {
+        return;
+      }
 
       audioContext =
-        new (
-          window.AudioContext ||
-          window.webkitAudioContext
-        )();
-
-    } catch (e) {
-
-      console.log(
-        "AudioContext 不可用"
-      );
+        new AudioContext();
 
     }
 
-  }
-
-}
-
-
-function unlockAudio() {
-
-  initAudio();
-
-  if (
-    audioContext &&
-    audioContext.state === "suspended"
-  ) {
-
-    audioContext.resume();
-
-  }
-
-}
-
-
-function createScanBeep() {
-
-  if (!audioContext) {
-    return;
-  }
-
-  const oscillator =
-    audioContext.createOscillator();
-
-  const gain =
-    audioContext.createGain();
-
-  oscillator.type = "sine";
-
-  oscillator.frequency.value = 880;
-
-  gain.gain.setValueAtTime(
-    0.0001,
-    audioContext.currentTime
-  );
-
-  gain.gain.exponentialRampToValueAtTime(
-    0.18,
-    audioContext.currentTime + 0.01
-  );
-
-  gain.gain.exponentialRampToValueAtTime(
-    0.0001,
-    audioContext.currentTime + 0.13
-  );
-
-  oscillator.connect(gain);
-
-  gain.connect(
-    audioContext.destination
-  );
-
-  oscillator.start();
-
-  oscillator.stop(
-    audioContext.currentTime + 0.13
-  );
-
-}
-
-
-function playScanBeep() {
-
-  try {
-
-    initAudio();
-
     if (
-      audioContext &&
       audioContext.state === "suspended"
     ) {
 
-      audioContext.resume().then(
-        createScanBeep
+      audioContext.resume().catch(
+        function() {}
       );
 
-    } else {
+    }
+
+  }
+
+
+  function unlockAudio() {
+
+    initAudio();
+
+  }
+
+
+  function playScanBeep() {
+
+    try {
+
+      initAudio();
+
+      if (!audioContext) {
+        return;
+      }
+
+      if (
+        audioContext.state === "suspended"
+      ) {
+
+        audioContext.resume().then(
+          function() {
+            createScanBeep();
+          }
+        ).catch(
+          function() {}
+        );
+
+        return;
+
+      }
 
       createScanBeep();
 
+    } catch (error) {
+
+      // 声音失败不影响扫码功能
+
     }
 
-  } catch (e) {
-
-    console.log(
-      "提示音播放失败",
-      e
-    );
-
-  }
-
-}
-
-
-document.addEventListener(
-  "touchstart",
-  unlockAudio,
-  {
-    once: true
-  }
-);
-
-document.addEventListener(
-  "click",
-  unlockAudio,
-  {
-    once: true
-  }
-);
-
-
-/* ==============================
-   页面初始化
-   ============================== */
-
-window.onload = function() {
-
-  initAudio();
-
-  startScanner();
-
-};
-
-
-/* ==============================
-   摄像头
-   ============================== */
-
-function startScanner() {
-
-  scanner =
-    new Html5Qrcode(
-      "reader"
-    );
-
-  const config = {
-
-    fps: 15,
-
-    qrbox: function(
-      viewfinderWidth,
-      viewfinderHeight
-    ) {
-
-      return {
-
-        width: Math.min(
-          Math.floor(
-            viewfinderWidth * 0.90
-          ),
-          400
-        ),
-
-        height: Math.min(
-          Math.floor(
-            viewfinderHeight * 0.55
-          ),
-          220
-        )
-
-      };
-
-    },
-
-    formatsToSupport: [
-
-      Html5QrcodeSupportedFormats.CODE_128,
-
-      Html5QrcodeSupportedFormats.CODE_39,
-
-      Html5QrcodeSupportedFormats.EAN_13,
-
-      Html5QrcodeSupportedFormats.EAN_8,
-
-      Html5QrcodeSupportedFormats.UPC_A,
-
-      Html5QrcodeSupportedFormats.UPC_E
-
-    ]
-
-  };
-
-
-  scanner.start(
-
-    {
-      facingMode: "environment"
-    },
-
-    config,
-
-    onScanSuccess,
-
-    onScanFailure
-
-  )
-  .then(function() {
-
-    document.getElementById(
-      "scanStatus"
-    ).textContent =
-      "请扫描商品条码";
-
-  })
-  .catch(function(error) {
-
-    document.getElementById(
-      "scanStatus"
-    ).textContent =
-      "摄像头启动失败：" +
-      error;
-
-  });
-
-}
-
-
-/* ==============================
-   扫码成功
-   ============================== */
-
-function onScanSuccess(
-  decodedText
-) {
-
-  if (
-    pendingScanValue !== ""
-  ) {
-
-    return;
-
-  }
-
-  pendingScanValue =
-    String(decodedText).trim();
-
-  playScanBeep();
-
-  hideManualInput();
-
-  document.getElementById(
-    "resultBox"
-  ).textContent =
-    pendingScanValue;
-
-  document.getElementById(
-    "confirmScanButton"
-  ).style.display =
-    "block";
-
-  document.getElementById(
-    "rescanButton"
-  ).style.display =
-    "block";
-
-  document.getElementById(
-    "scanStatus"
-  ).textContent =
-    scanStep === "product"
-      ? "确认商品序号"
-      : "确认仓存位置";
-
-}
-
-
-/* ==============================
-   扫码失败
-   ============================== */
-
-function onScanFailure(error) {
-}
-
-
-/* ==============================
-   确认扫码
-   ============================== */
-
-function confirmScan() {
-
-  if (
-    !pendingScanValue
-  ) {
-
-    return;
-
-  }
-
-  if (
-    scanStep === "product"
-  ) {
-
-    serial =
-      pendingScanValue;
-
-    document.getElementById(
-      "serialDisplay"
-    ).textContent =
-      serial;
-
-    pendingScanValue = "";
-
-    document.getElementById(
-      "resultBox"
-    ).textContent =
-      "";
-
-    document.getElementById(
-      "confirmScanButton"
-    ).style.display =
-      "none";
-
-    document.getElementById(
-      "rescanButton"
-    ).style.display =
-      "none";
-
-    scanStep = "location";
-
-    document.getElementById(
-      "scanStatus"
-    ).textContent =
-      "请扫描仓存位置";
-
-    return;
-
   }
 
 
-  if (
-    scanStep === "location"
-  ) {
+  function createScanBeep() {
 
-    stockLocation =
-      pendingScanValue;
+    try {
 
-    document.getElementById(
-      "locationDisplay"
-    ).textContent =
-      stockLocation;
+      const oscillator =
+        audioContext.createOscillator();
 
-    pendingScanValue = "";
+      const gainNode =
+        audioContext.createGain();
 
-    document.getElementById(
-      "resultBox"
-    ).textContent =
-      "";
+      oscillator.type = "sine";
 
-    document.getElementById(
-      "confirmScanButton"
-    ).style.display =
-      "none";
-
-    document.getElementById(
-      "rescanButton"
-    ).style.display =
-      "none";
-
-    scanStep = "ready";
-
-    document.getElementById(
-      "scanStatus"
-    ).textContent =
-      "商品和仓位已确认";
-
-  }
-
-}
-
-
-/* ==============================
-   重新扫描
-   ============================== */
-
-function rescan() {
-
-  pendingScanValue = "";
-
-  document.getElementById(
-    "resultBox"
-  ).textContent =
-    "";
-
-  document.getElementById(
-    "confirmScanButton"
-  ).style.display =
-    "none";
-
-  document.getElementById(
-    "rescanButton"
-  ).style.display =
-    "none";
-
-  document.getElementById(
-    "scanStatus"
-  ).textContent =
-    scanStep === "product"
-      ? "请重新扫描商品条码"
-      : "请重新扫描仓存位置";
-
-}
-
-
-/* ==============================
-   手动输入
-   ============================== */
-
-function showManualInput() {
-
-  const manualArea =
-    document.getElementById(
-      "manualArea"
-    );
-
-  const manualToggleButton =
-    document.getElementById(
-      "manualToggleButton"
-    );
-
-  const manualInput =
-    document.getElementById(
-      "manualInput"
-    );
-
-  const manualTitle =
-    document.getElementById(
-      "manualTitle"
-    );
-
-
-  manualArea.classList.add(
-    "show"
-  );
-
-  manualToggleButton.style.display =
-    "none";
-
-
-  if (
-    scanStep === "product"
-  ) {
-
-    manualTitle.textContent =
-      "手动输入商品序号";
-
-    manualInput.placeholder =
-      "请输入商品序号";
-
-  } else {
-
-    manualTitle.textContent =
-      "手动输入仓存位置";
-
-    manualInput.placeholder =
-      "请输入仓存位置";
-
-  }
-
-
-  manualInput.value = "";
-
-  setTimeout(function() {
-
-    manualInput.focus();
-
-  }, 100);
-
-}
-
-
-function hideManualInput() {
-
-  const manualArea =
-    document.getElementById(
-      "manualArea"
-    );
-
-  const manualToggleButton =
-    document.getElementById(
-      "manualToggleButton"
-    );
-
-  const manualInput =
-    document.getElementById(
-      "manualInput"
-    );
-
-
-  manualArea.classList.remove(
-    "show"
-  );
-
-  manualToggleButton.style.display =
-    "inline-block";
-
-  manualInput.value = "";
-
-}
-
-
-function confirmManualInput() {
-
-  const manualInput =
-    document.getElementById(
-      "manualInput"
-    );
-
-  const value =
-    manualInput.value.trim();
-
-
-  if (!value) {
-
-    alert(
-      scanStep === "product"
-        ? "请输入商品序号"
-        : "请输入仓存位置"
-    );
-
-    manualInput.focus();
-
-    return;
-
-  }
-
-
-  pendingScanValue =
-    value;
-
-  document.getElementById(
-    "resultBox"
-  ).textContent =
-    pendingScanValue;
-
-  document.getElementById(
-    "confirmScanButton"
-  ).style.display =
-    "block";
-
-  document.getElementById(
-    "rescanButton"
-  ).style.display =
-    "block";
-
-
-  document.getElementById(
-    "scanStatus"
-  ).textContent =
-    scanStep === "product"
-      ? "确认商品序号"
-      : "确认仓存位置";
-
-
-  hideManualInput();
-
-}
-
-
-/* ==============================
-   执行库存操作
-   ============================== */
-
-function executeInventory() {
-
-  const quantity =
-    document.getElementById(
-      "quantity"
-    ).value.trim();
-
-  const operationType =
-    document.getElementById(
-      "operationType"
-    ).value;
-
-
-  if (!serial) {
-
-    alert(
-      "请先确认商品序号"
-    );
-
-    return;
-
-  }
-
-
-  if (!stockLocation) {
-
-    alert(
-      "请先确认仓存位置"
-    );
-
-    return;
-
-  }
-
-
-  if (
-    !quantity ||
-    Number(quantity) <= 0
-  ) {
-
-    alert(
-      "请输入正确的数量"
-    );
-
-    return;
-
-  }
-
-
-  const button =
-    document.querySelector(
-      ".execute-button"
-    );
-
-  button.disabled = true;
-
-  button.textContent =
-    "正在执行...";
-
-
-  fetch(
-    SCRIPT_URL,
-    {
-
-      method: "POST",
-
-      headers: {
-        "Content-Type":
-          "text/plain;charset=utf-8"
-      },
-
-      body: JSON.stringify({
-
-        action: "inventory",
-
-        serial: serial,
-
-        oldLocation:
-          operationType === "移库"
-            ? stockLocation
-            : "",
-
-        newLocation:
-          operationType === "出库"
-            ? ""
-            : stockLocation,
-
-        quantity:
-          quantity,
-
-        operationType:
-          operationType
-
-      })
-
-    }
-  )
-  .then(function(response) {
-
-    return response.json();
-
-  })
-  .then(function(data) {
-
-    if (
-      data.success
-    ) {
-
-      alert(
-        data.message ||
-        "库存操作成功"
+      oscillator.frequency.setValueAtTime(
+        880,
+        audioContext.currentTime
       );
 
-      resetAll();
+      gainNode.gain.setValueAtTime(
+        0.0001,
+        audioContext.currentTime
+      );
+
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.18,
+        audioContext.currentTime + 0.01
+      );
+
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.0001,
+        audioContext.currentTime + 0.12
+      );
+
+      oscillator.connect(gainNode);
+
+      gainNode.connect(
+        audioContext.destination
+      );
+
+      oscillator.start();
+
+      oscillator.stop(
+        audioContext.currentTime + 0.13
+      );
+
+    } catch (error) {
+
+      // 声音失败不影响扫码功能
+
+    }
+
+  }
+
+
+  document.addEventListener(
+    "touchstart",
+    unlockAudio,
+    {
+      passive: true
+    }
+  );
+
+  document.addEventListener(
+    "click",
+    unlockAudio,
+    {
+      passive: true
+    }
+  );
+
+
+  // ==========================================
+  // 扫描状态
+  // ==========================================
+
+  let scanner = null;
+
+  let step = "serial";
+
+  let pendingResult = "";
+
+  let serial = "";
+
+  let stockLocation = "";
+
+
+  // ==========================================
+  // 页面加载
+  // ==========================================
+
+  window.addEventListener(
+    "load",
+    function() {
+
+      startScanner();
+
+    }
+  );
+
+
+  // ==========================================
+  // 启动摄像头
+  // ==========================================
+
+  function startScanner() {
+
+    scanner =
+      new Html5Qrcode("reader");
+
+
+    const config = {
+
+      fps: 15,
+
+      qrbox: function(
+        viewfinderWidth,
+        viewfinderHeight
+      ) {
+
+        return {
+
+          width: Math.min(
+            Math.floor(
+              viewfinderWidth * 0.90
+            ),
+            400
+          ),
+
+          height: Math.min(
+            Math.floor(
+              viewfinderHeight * 0.55
+            ),
+            220
+          )
+
+        };
+
+      },
+
+      formatsToSupport: [
+
+        Html5QrcodeSupportedFormats.CODE_128,
+
+        Html5QrcodeSupportedFormats.CODE_39,
+
+        Html5QrcodeSupportedFormats.EAN_13,
+
+        Html5QrcodeSupportedFormats.EAN_8,
+
+        Html5QrcodeSupportedFormats.UPC_A,
+
+        Html5QrcodeSupportedFormats.UPC_E
+
+      ]
+
+    };
+
+
+    scanner.start(
+
+      {
+        facingMode: "environment"
+      },
+
+      config,
+
+      onScanSuccess,
+
+      onScanFailure
+
+    )
+
+    .then(function() {
+
+      updateStatus();
+
+    })
+
+    .catch(function(error) {
+
+      document.getElementById(
+        "scanStatus"
+      ).innerText =
+        "无法启动摄像头：" + error;
+
+    });
+
+  }
+
+
+  // ==========================================
+  // 扫描成功
+  // ==========================================
+
+  function onScanSuccess(decodedText) {
+
+    if (
+      step !== "serial" &&
+      step !== "location"
+    ) {
+
+      return;
+
+    }
+
+
+    playScanBeep();
+
+
+    pendingResult =
+      String(decodedText).trim();
+
+
+    document.getElementById(
+      "resultValue"
+    ).innerText =
+      pendingResult;
+
+
+    document.getElementById(
+      "resultBox"
+    ).classList.remove("hidden");
+
+
+    // 如果之前打开了手动输入，
+    // 扫码成功后自动关闭
+    hideManualInput();
+
+
+    if (step === "serial") {
+
+      document.getElementById(
+        "confirmButton"
+      ).innerText =
+        "确认商品序号";
 
     } else {
 
-      alert(
-        data.message ||
-        "库存操作失败"
+      document.getElementById(
+        "confirmButton"
+      ).innerText =
+        "确认仓存位置";
+
+    }
+
+
+    updateStatus();
+
+  }
+
+
+  // ==========================================
+  // 确认扫描结果
+  // ==========================================
+
+  function confirmScan() {
+
+    if (!pendingResult) {
+
+      return;
+
+    }
+
+
+    if (step === "serial") {
+
+      serial =
+        pendingResult;
+
+
+      document.getElementById(
+        "serialDisplay"
+      ).innerText =
+        serial;
+
+
+      pendingResult = "";
+
+
+      document.getElementById(
+        "resultBox"
+      ).classList.add("hidden");
+
+
+      step = "location";
+
+
+      updateManualInputText();
+
+      updateStatus();
+
+
+      return;
+
+    }
+
+
+    if (step === "location") {
+
+      stockLocation =
+        pendingResult;
+
+
+      document.getElementById(
+        "locationDisplay"
+      ).innerText =
+        stockLocation;
+
+
+      pendingResult = "";
+
+
+      document.getElementById(
+        "resultBox"
+      ).classList.add("hidden");
+
+
+      step = "ready";
+
+
+      updateManualInputText();
+
+      updateStatus();
+
+
+      return;
+
+    }
+
+  }
+
+
+  // ==========================================
+  // 当前扫描结果不正确
+  // ==========================================
+
+  function retryScan() {
+
+    pendingResult = "";
+
+
+    document.getElementById(
+      "resultBox"
+    ).classList.add("hidden");
+
+
+    updateStatus();
+
+  }
+
+
+  // ==========================================
+  // 显示手动输入
+  // ==========================================
+
+  function showManualInput() {
+
+    if (
+      step !== "serial" &&
+      step !== "location"
+    ) {
+
+      return;
+
+    }
+
+
+    document.getElementById(
+      "manualBox"
+    ).classList.remove("hidden");
+
+
+    document.getElementById(
+      "manualToggleButton"
+    ).classList.add("hidden");
+
+
+    updateManualInputText();
+
+
+    const input =
+      document.getElementById(
+        "manualInput"
+      );
+
+
+    input.value = "";
+
+
+    // 稍微延迟一下，
+    // 确保 iPhone 键盘正常弹出
+    setTimeout(
+      function() {
+
+        input.focus();
+
+      },
+      100
+    );
+
+  }
+
+
+  // ==========================================
+  // 隐藏手动输入
+  // ==========================================
+
+  function hideManualInput() {
+
+    document.getElementById(
+      "manualBox"
+    ).classList.add("hidden");
+
+
+    document.getElementById(
+      "manualToggleButton"
+    ).classList.remove("hidden");
+
+  }
+
+
+  // ==========================================
+  // 更新手动输入文字
+  // ==========================================
+
+  function updateManualInputText() {
+
+    const title =
+      document.getElementById(
+        "manualTitle"
+      );
+
+    const input =
+      document.getElementById(
+        "manualInput"
+      );
+
+
+    if (step === "serial") {
+
+      title.innerText =
+        "手动输入商品序号";
+
+      input.placeholder =
+        "请输入商品序号";
+
+    }
+
+    else if (step === "location") {
+
+      title.innerText =
+        "手动输入仓存位置";
+
+      input.placeholder =
+        "请输入仓存位置";
+
+    }
+
+    else {
+
+      title.innerText =
+        "";
+
+      input.placeholder =
+        "";
+
+    }
+
+  }
+
+
+  // ==========================================
+  // 确认手动输入
+  // ==========================================
+
+  function confirmManualInput() {
+
+    const input =
+      document.getElementById(
+        "manualInput"
+      );
+
+    const value =
+      input.value.trim();
+
+
+    if (!value) {
+
+      input.focus();
+
+      return;
+
+    }
+
+
+    pendingResult = value;
+
+
+    if (step === "serial") {
+
+      serial =
+        pendingResult;
+
+
+      document.getElementById(
+        "serialDisplay"
+      ).innerText =
+        serial;
+
+
+      pendingResult = "";
+
+
+      step = "location";
+
+
+      hideManualInput();
+
+      hideKeyboard();
+
+      updateManualInputText();
+
+      updateStatus();
+
+
+      return;
+
+    }
+
+
+    if (step === "location") {
+
+      stockLocation =
+        pendingResult;
+
+
+      document.getElementById(
+        "locationDisplay"
+      ).innerText =
+        stockLocation;
+
+
+      pendingResult = "";
+
+
+      step = "ready";
+
+
+      hideManualInput();
+
+      hideKeyboard();
+
+      updateManualInputText();
+
+      updateStatus();
+
+
+      return;
+
+    }
+
+  }
+
+
+  // ==========================================
+  // 收起 iPhone 键盘
+  // ==========================================
+
+  function hideKeyboard() {
+
+    const input =
+      document.getElementById(
+        "manualInput"
+      );
+
+
+    input.blur();
+
+  }
+
+
+  // ==========================================
+  // 状态文字
+  // ==========================================
+
+  function updateStatus() {
+
+    const title =
+      document.getElementById(
+        "stepTitle"
+      );
+
+    const status =
+      document.getElementById(
+        "scanStatus"
+      );
+
+
+    if (step === "serial") {
+
+      title.innerText =
+        "第一步：扫描商品条码";
+
+      status.innerText =
+        "请扫描商品条码";
+
+    }
+
+    else if (step === "location") {
+
+      title.innerText =
+        "第二步：扫描仓存位置";
+
+      status.innerText =
+        "商品序号已确认，请扫描仓存位置条码";
+
+    }
+
+    else {
+
+      title.innerText =
+        "扫码完成";
+
+      status.innerText =
+        "商品和仓存位置已确认，请输入数量";
+
+    }
+
+  }
+
+
+  // ==========================================
+  // 执行入库
+  // ==========================================
+
+  async function executeStockIn() {
+
+    hideMessages();
+
+
+    if (!serial) {
+
+      showError(
+        "请先扫描并确认商品序号"
+      );
+
+      return;
+
+    }
+
+
+    if (!stockLocation) {
+
+      showError(
+        "请先扫描并确认仓存位置"
+      );
+
+      return;
+
+    }
+
+
+    const quantity =
+      document.getElementById(
+        "quantityInput"
+      ).value.trim();
+
+
+    if (!quantity) {
+
+      showError(
+        "请输入入库数量"
+      );
+
+      return;
+
+    }
+
+
+    if (
+      Number(quantity) <= 0 ||
+      !Number.isInteger(
+        Number(quantity)
+      )
+    ) {
+
+      showError(
+        "入库数量必须是大于 0 的整数"
+      );
+
+      return;
+
+    }
+
+
+    const button =
+      document.getElementById(
+        "stockInButton"
+      );
+
+
+    button.disabled = true;
+
+    button.innerText =
+      "正在执行入库……";
+
+
+    try {
+
+      const response =
+        await fetch(
+          APPS_SCRIPT_URL,
+          {
+
+            method: "POST",
+
+            headers: {
+
+              "Content-Type":
+                "text/plain;charset=utf-8"
+
+            },
+
+            body: JSON.stringify({
+
+              action: "inventory",
+
+              serial: serial,
+
+              oldLocation: "",
+
+              newLocation: stockLocation,
+
+              quantity: Number(quantity),
+
+              operationType: "入库"
+
+            })
+
+          }
+        );
+
+
+      const result =
+        await response.json();
+
+
+      if (result.success) {
+
+        showSuccess(
+          result.message ||
+          "入库成功"
+        );
+
+
+        button.innerText =
+          "入库成功";
+
+
+      } else {
+
+        showError(
+          result.message ||
+          "入库失败"
+        );
+
+
+        button.disabled = false;
+
+        button.innerText =
+          "执行入库";
+
+      }
+
+    }
+
+    catch (error) {
+
+      showError(
+        "通信失败：" +
+        error.message
+      );
+
+
+      button.disabled = false;
+
+      button.innerText =
+        "执行入库";
+
+    }
+
+  }
+
+
+  // ==========================================
+  // 测试连接
+  // ==========================================
+
+  async function testConnection() {
+
+    hideMessages();
+
+
+    try {
+
+      const response =
+        await fetch(
+          APPS_SCRIPT_URL,
+          {
+
+            method: "POST",
+
+            headers: {
+
+              "Content-Type":
+                "text/plain;charset=utf-8"
+
+            },
+
+            body: JSON.stringify({
+
+              action: "test"
+
+            })
+
+          }
+        );
+
+
+      const result =
+        await response.json();
+
+
+      if (result.success) {
+
+        showSuccess(
+          "✓ " + result.message
+        );
+
+      } else {
+
+        showError(
+          result.message ||
+          "连接失败"
+        );
+
+      }
+
+    }
+
+    catch (error) {
+
+      showError(
+        "通信失败：" +
+        error.message
       );
 
     }
 
-  })
-  .catch(function(error) {
+  }
 
-    alert(
-      "连接失败：" +
-      error
-    );
 
-  })
-  .finally(function() {
+  // ==========================================
+  // 完全重新开始
+  // ==========================================
+
+  function resetAll() {
+
+    serial = "";
+
+    stockLocation = "";
+
+    pendingResult = "";
+
+    step = "serial";
+
+
+    document.getElementById(
+      "serialDisplay"
+    ).innerText =
+      "等待扫描";
+
+
+    document.getElementById(
+      "locationDisplay"
+    ).innerText =
+      "等待扫描";
+
+
+    document.getElementById(
+      "quantityInput"
+    ).value =
+      "";
+
+
+    document.getElementById(
+      "resultBox"
+    ).classList.add("hidden");
+
+
+    document.getElementById(
+      "manualInput"
+    ).value =
+      "";
+
+
+    hideManualInput();
+
+
+    const button =
+      document.getElementById(
+        "stockInButton"
+      );
+
 
     button.disabled = false;
 
-    button.textContent =
+    button.innerText =
       "执行入库";
 
-  });
 
-}
-
-
-/* ==============================
-   测试连接
-   ============================== */
-
-function testConnection() {
-
-  fetch(
-    SCRIPT_URL +
-      "?callback=phoneTestCallback"
-  )
-  .then(function(response) {
-
-    return response.text();
-
-  })
-  .then(function(text) {
-
-    alert(
-      "手机扫码前端与 Apps Script 通信成功"
-    );
-
-  })
-  .catch(function(error) {
-
-    alert(
-      "连接失败：" +
-      error
-    );
-
-  });
-
-}
+    hideMessages();
 
 
-/* ==============================
-   重置
-   ============================== */
+    updateManualInputText();
 
-function resetAll() {
+    updateStatus();
 
-  serial = "";
-
-  stockLocation = "";
-
-  pendingScanValue = "";
-
-  scanStep = "product";
+  }
 
 
-  document.getElementById(
-    "serialDisplay"
-  ).textContent =
-    "-";
+  // ==========================================
+  // 成功
+  // ==========================================
 
-  document.getElementById(
-    "locationDisplay"
-  ).textContent =
-    "-";
+  function showSuccess(message) {
 
-  document.getElementById(
-    "stockDisplay"
-  ).textContent =
-    "-";
+    const element =
+      document.getElementById(
+        "successMessage"
+      );
 
-  document.getElementById(
-    "quantity"
-  ).value =
-    "";
 
-  document.getElementById(
-    "resultBox"
-  ).textContent =
-    "";
+    element.innerText =
+      message;
 
-  document.getElementById(
-    "scanStatus"
-  ).textContent =
-    "请扫描商品条码";
 
-  document.getElementById(
-    "confirmScanButton"
-  ).style.display =
-    "none";
+    element.style.display =
+      "block";
 
-  document.getElementById(
-    "rescanButton"
-  ).style.display =
-    "none";
+  }
 
-  hideManualInput();
 
-}
+  // ==========================================
+  // 错误
+  // ==========================================
+
+  function showError(message) {
+
+    const element =
+      document.getElementById(
+        "errorMessage"
+      );
+
+
+    element.innerText =
+      "❌ " + message;
+
+
+    element.style.display =
+      "block";
+
+  }
+
+
+  // ==========================================
+  // 隐藏提示
+  // ==========================================
+
+  function hideMessages() {
+
+    document.getElementById(
+      "successMessage"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "errorMessage"
+    ).style.display =
+      "none";
+
+  }
+
+
+  // ==========================================
+  // 扫描失败
+  // ==========================================
+
+  function onScanFailure(error) {
+
+    // 不显示连续扫描失败信息
+
+  }
 
 </script>
 
