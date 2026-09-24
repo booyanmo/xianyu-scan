@@ -1198,10 +1198,6 @@
 
 
   // ==========================================
-  // 启动摄像头
-  // ==========================================
-
-  // ==========================================
 // 启动摄像头
 // ==========================================
 
@@ -1209,7 +1205,6 @@ async function startScanner() {
 
   scanner =
     new Html5Qrcode("reader");
-
 
 
   const config = {
@@ -1260,7 +1255,6 @@ async function startScanner() {
   };
 
 
-
   try {
 
     await scanner.start(
@@ -1278,9 +1272,8 @@ async function startScanner() {
     );
 
 
-
     // ==========================================
-    // 尝试开启连续自动对焦
+    // 摄像头自动对焦 + 适度数字变焦
     // ==========================================
 
     try {
@@ -1291,12 +1284,13 @@ async function startScanner() {
         );
 
 
-
-      if (video && video.srcObject) {
+      if (
+        video &&
+        video.srcObject
+      ) {
 
         const tracks =
           video.srcObject.getVideoTracks();
-
 
 
         if (
@@ -1308,17 +1302,19 @@ async function startScanner() {
             tracks[0];
 
 
-
-          // 获取当前摄像头支持的能力
           const capabilities =
             track.getCapabilities
               ? track.getCapabilities()
               : {};
 
 
+          const advancedConstraints = {};
 
-          // 如果设备支持 focusMode，
-          // 优先使用连续自动对焦
+
+          // --------------------------------------
+          // 连续自动对焦
+          // --------------------------------------
+
           if (
             capabilities.focusMode &&
             capabilities.focusMode.includes(
@@ -1326,18 +1322,92 @@ async function startScanner() {
             )
           ) {
 
-            await track.applyConstraints({
+            advancedConstraints.focusMode =
+              "continuous";
 
-              advanced: [
+          }
 
-                {
-                  focusMode:
-                    "continuous"
-                }
 
-              ]
+          // --------------------------------------
+          // 适度数字变焦
+          // --------------------------------------
 
-            });
+          if (
+            typeof capabilities.zoom ===
+            "object" &&
+            capabilities.zoom !== null
+          ) {
+
+            const minZoom =
+              Number(
+                capabilities.zoom.min
+              );
+
+            const maxZoom =
+              Number(
+                capabilities.zoom.max
+              );
+
+
+            if (
+              Number.isFinite(minZoom) &&
+              Number.isFinite(maxZoom) &&
+              maxZoom > minZoom
+            ) {
+
+              // 目标约 1.5 倍
+              let targetZoom = 1.5;
+
+
+              // 不超过设备允许范围
+              targetZoom =
+                Math.max(
+                  minZoom,
+                  Math.min(
+                    targetZoom,
+                    maxZoom
+                  )
+                );
+
+
+              advancedConstraints.zoom =
+                targetZoom;
+
+            }
+
+          }
+
+
+          // --------------------------------------
+          // 应用摄像头优化
+          // --------------------------------------
+
+          if (
+            Object.keys(
+              advancedConstraints
+            ).length > 0
+          ) {
+
+            try {
+
+              await track.applyConstraints({
+
+                advanced: [
+                  advancedConstraints
+                ]
+
+              });
+
+            }
+
+            catch (constraintError) {
+
+              console.log(
+                "摄像头优化未完全生效：",
+                constraintError
+              );
+
+            }
 
           }
 
@@ -1347,17 +1417,16 @@ async function startScanner() {
 
     }
 
-    catch (focusError) {
+    catch (cameraError) {
 
-      // 部分 iPhone / Safari 不允许网页控制对焦
-      // 对焦设置失败时继续正常扫码
+      // 摄像头不支持相关控制时，
+      // 不影响正常扫码
       console.log(
-        "连续自动对焦设置未生效：",
-        focusError
+        "摄像头自动优化未生效：",
+        cameraError
       );
 
     }
-
 
 
     updateStatus();
@@ -1369,7 +1438,8 @@ async function startScanner() {
     document.getElementById(
       "scanStatus"
     ).innerText =
-      "无法启动摄像头：" + error;
+      "无法启动摄像头：" +
+      error;
 
   }
 
