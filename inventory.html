@@ -1201,61 +1201,69 @@
   // 启动摄像头
   // ==========================================
 
-  function startScanner() {
+  // ==========================================
+// 启动摄像头
+// ==========================================
 
-    scanner =
-      new Html5Qrcode("reader");
+async function startScanner() {
+
+  scanner =
+    new Html5Qrcode("reader");
 
 
-    const config = {
 
-      fps: 15,
+  const config = {
 
-      qrbox: function(
-        viewfinderWidth,
-        viewfinderHeight
-      ) {
+    fps: 15,
 
-        return {
+    qrbox: function(
+      viewfinderWidth,
+      viewfinderHeight
+    ) {
 
-          width: Math.min(
-            Math.floor(
-              viewfinderWidth * 0.90
-            ),
-            400
+      return {
+
+        width: Math.min(
+          Math.floor(
+            viewfinderWidth * 0.90
           ),
+          400
+        ),
 
-          height: Math.min(
-            Math.floor(
-              viewfinderHeight * 0.55
-            ),
-            220
-          )
+        height: Math.min(
+          Math.floor(
+            viewfinderHeight * 0.55
+          ),
+          220
+        )
 
-        };
+      };
 
-      },
+    },
 
-      formatsToSupport: [
+    formatsToSupport: [
 
-        Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_128,
 
-        Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.CODE_39,
 
-        Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_13,
 
-        Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.EAN_8,
 
-        Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.UPC_A,
 
-        Html5QrcodeSupportedFormats.UPC_E
+      Html5QrcodeSupportedFormats.UPC_E
 
-      ]
+    ]
 
-    };
+  };
 
 
-    scanner.start(
+
+  try {
+
+    await scanner.start(
 
       {
         facingMode: "environment"
@@ -1267,24 +1275,105 @@
 
       onScanFailure
 
-    )
+    );
 
-    .then(function() {
 
-      updateStatus();
 
-    })
+    // ==========================================
+    // 尝试开启连续自动对焦
+    // ==========================================
 
-    .catch(function(error) {
+    try {
 
-      document.getElementById(
-        "scanStatus"
-      ).innerText =
-        "无法启动摄像头：" + error;
+      const video =
+        document.querySelector(
+          "#reader video"
+        );
 
-    });
+
+
+      if (video && video.srcObject) {
+
+        const tracks =
+          video.srcObject.getVideoTracks();
+
+
+
+        if (
+          tracks &&
+          tracks.length > 0
+        ) {
+
+          const track =
+            tracks[0];
+
+
+
+          // 获取当前摄像头支持的能力
+          const capabilities =
+            track.getCapabilities
+              ? track.getCapabilities()
+              : {};
+
+
+
+          // 如果设备支持 focusMode，
+          // 优先使用连续自动对焦
+          if (
+            capabilities.focusMode &&
+            capabilities.focusMode.includes(
+              "continuous"
+            )
+          ) {
+
+            await track.applyConstraints({
+
+              advanced: [
+
+                {
+                  focusMode:
+                    "continuous"
+                }
+
+              ]
+
+            });
+
+          }
+
+        }
+
+      }
+
+    }
+
+    catch (focusError) {
+
+      // 部分 iPhone / Safari 不允许网页控制对焦
+      // 对焦设置失败时继续正常扫码
+      console.log(
+        "连续自动对焦设置未生效：",
+        focusError
+      );
+
+    }
+
+
+
+    updateStatus();
 
   }
+
+  catch (error) {
+
+    document.getElementById(
+      "scanStatus"
+    ).innerText =
+      "无法启动摄像头：" + error;
+
+  }
+
+}
 
 
   // ==========================================
